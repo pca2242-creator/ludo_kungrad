@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ludo Game</title>
+    <title>Ludo Kungrad</title>
     <script src="https://telegram.org"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,33 +12,39 @@
     <div class="game-container">
         <h2>Ludo Kungrad ??</h2>
         
-        <!-- LUDO TAXTASI -->
+        <!-- HAQIQIY LUDO TAXTASI -->
         <div class="ludo-board">
-            <!-- Qizil o'yinchi uyi (Tepada chapda) -->
-            <div class="home red-home">
-                <div class="base-box">
+            <!-- Qizil uy -->
+            <div class="home-zone red-zone">
+                <div class="inner-box">
                     <div class="piece red-piece" id="red-p1"></div>
                     <div class="piece red-piece" id="red-p2"></div>
                 </div>
             </div>
             
-            <!-- Tepadagi tik yo'lak -->
-            <div class="path-vertical">
-                <div class="cell"></div><div class="cell"></div><div class="cell"></div>
-                <div class="cell"></div><div class="cell"></div><div class="cell"></div>
-                <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <!-- Yashil uy -->
+            <div class="home-zone green-zone">
+                <div class="inner-box"></div>
             </div>
             
-            <!-- Ko'k o'yinchi uyi (Tepada o'ngda) -->
-            <div class="home blue-home">
-                <div class="base-box">
+            <!-- Sariq uy -->
+            <div class="home-zone yellow-zone">
+                <div class="inner-box"></div>
+            </div>
+            
+            <!-- Ko'k uy -->
+            <div class="home-zone blue-zone">
+                <div class="inner-box">
                     <div class="piece blue-piece" id="blue-p1"></div>
                     <div class="piece blue-piece" id="blue-p2"></div>
                 </div>
             </div>
+
+            <!-- O'rtadagi marra va yo'laklar avtomat CSS orqali chiziladi -->
+            <div class="center-marra">??</div>
         </div>
 
-        <!-- PASDA ALOHIDA ZARK (KUBIK) QISMI -->
+        <!-- PASTGI ZARK QISMI -->
         <div class="dice-section">
             <p id="turn-text">Navbat: <span style="color: #ff4d4d; font-weight: bold;">Qizil</span></p>
             <div class="dice-box" id="dice-view">1</div>
