@@ -1,54 +1,52 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ludo Kungrad</title>
     <script src="https://telegram.org"></script>
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
     <div class="game-container">
-        <h2>Ludo Kungrad ??</h2>
+        <h2>Ludo Kungrad 🎲</h2>
         
-        <!-- HAQIQIY LUDO TAXTASI -->
         <div class="ludo-board">
             <!-- Qizil uy -->
             <div class="home-zone red-zone">
-                <div class="inner-box">
-                    <div class="piece red-piece" id="red-p1"></div>
-                    <div class="piece red-piece" id="red-p2"></div>
+                <div class="inner-box" id="red-home">
+                    <div class="piece red-piece" id="red-p1" onclick="movePiece('red', 1)"></div>
+                    <div class="piece red-piece" id="red-p2" onclick="movePiece('red', 2)"></div>
                 </div>
+            </div>
+            
+            <!-- Yo'laklar (Kataklar ichi CSS-da boshqariladi) -->
+            <div class="path-area" id="board-cells">
+                <!-- Kataklar dinamik ravishda JS yoki CSS orqali chiziladi, hozircha oddiy bloklar -->
             </div>
             
             <!-- Yashil uy -->
-            <div class="home-zone green-zone">
-                <div class="inner-box"></div>
-            </div>
-            
+            <div class="home-zone green-zone"><div class="inner-box"></div></div>
             <!-- Sariq uy -->
-            <div class="home-zone yellow-zone">
-                <div class="inner-box"></div>
-            </div>
+            <div class="home-zone yellow-zone"><div class="inner-box"></div></div>
             
             <!-- Ko'k uy -->
             <div class="home-zone blue-zone">
-                <div class="inner-box">
-                    <div class="piece blue-piece" id="blue-p1"></div>
-                    <div class="piece blue-piece" id="blue-p2"></div>
+                <div class="inner-box" id="blue-home">
+                    <div class="piece blue-piece" id="blue-p1" onclick="movePiece('blue', 1)"></div>
+                    <div class="piece blue-piece" id="blue-p2" onclick="movePiece('blue', 2)"></div>
                 </div>
             </div>
 
-            <!-- O'rtadagi marra va yo'laklar avtomat CSS orqali chiziladi -->
-            <div class="center-marra">??</div>
+            <div class="center-marra">MARRA</div>
         </div>
 
         <!-- PASTGI ZARK QISMI -->
         <div class="dice-section">
-            <p id="turn-text">Navbat: <span style="color: #ff4d4d; font-weight: bold;">Qizil</span></p>
+            <p id="turn-text">Navbat: <span style="color: #e74c3c; font-weight: bold;">Qizil</span></p>
             <div class="dice-box" id="dice-view">1</div>
-            <button id="roll-btn" onclick="playTurn()">Zarkni tashlash ??</button>
+            <button id="roll-btn" onclick="playTurn()">Zarkni tashlash 🎲</button>
         </div>
     </div>
 
