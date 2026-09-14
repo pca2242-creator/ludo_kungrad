@@ -3,279 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ludo King - Modern Design</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1e1e2f, #0f0f1a);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        h1 {
-            margin-bottom: 15px;
-            font-size: 2.2rem;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            letter-spacing: 2px;
-            background: linear-gradient(45deg, #ff4e50, #f9d423);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        canvas {
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            background-color: #ffffff;
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-        }
-
-        .turn-indicator {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .dice-btn {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b);
-            color: white;
-            border: none;
-            padding: 12px 28px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
-            transition: all 0.2s ease;
-        }
-
-        .dice-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 65, 108, 0.6);
-        }
-
-        .dice-btn:active {
-            transform: translateY(1px);
-        }
-
-        .dice-result {
-            width: 50px;
-            height: 50px;
-            background: #fff;
-            color: #333;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.3);
-        }
-    </style>
+    <title>Telegram Ludo</title>
+    <script src="https://telegram.org"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>LUDO KING</h1>
-
     <div class="game-container">
-        <canvas id="ludoCanvas" width="500" height="500"></canvas>
+        <h2>Ludo Kungrad ??</h2>
         
-        <div class="controls">
-            <div class="turn-indicator" id="turnText">Navbat: <span style="color: #ff4757;">Qizil</span></div>
-            <button class="dice-btn" onclick="rollDice()">Zar tashlash ??</button>
-            <div class="dice-result" id="diceValue">-</div>
+        <!-- O'YIN TAXTASI -->
+        <div class="ludo-board">
+            
+            <!-- Qizil o'yinchi uyi (Boshlang'ich joyi) -->
+            <div class="player-home red-home">
+                <div class="home-box">
+                    <div class="piece red-piece" id="red-p1"></div>
+                    <div class="piece red-piece" id="red-p2"></div>
+                </div>
+            </div>
+            
+            <!-- O'yin yo'lagi (Kataklar) -->
+            <div class="main-path">
+                <div class="step-cell" id="cell-1"></div>
+                <div class="step-cell" id="cell-2"></div>
+                <div class="step-cell" id="cell-3"></div>
+                <div class="step-cell" id="cell-4"></div>
+                <div class="step-cell" id="cell-5"></div>
+                <div class="step-cell" id="cell-6"></div>
+            </div>
+            
+            <!-- Ko'k o'yinchi uyi (Boshlang'ich joyi) -->
+            <div class="player-home blue-home">
+                <div class="home-box">
+                    <div class="piece blue-piece" id="blue-p1"></div>
+                    <div class="piece blue-piece" id="blue-p2"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ALOHIDA KUBIK (ZARK) QISMI -->
+        <div class="dice-section">
+            <p id="turn-text">Navbat: <span style="color: #ff4d4d; font-weight: bold;">Qizil</span></p>
+            <div class="dice-box" id="dice-view">1</div>
+            <button id="roll-btn" onclick="playTurn()">Zarkni tashlash ??</button>
         </div>
     </div>
 
+    <script src="script.js"></script>
     <script>
-        const canvas = document.getElementById('ludoCanvas');
-        const ctx = canvas.getContext('2d');
-        const size = canvas.width;
-        const box = size / 15;
-
-        // Ranglar palitrasi (Modern Premium Style)
-        const colors = {
-            red: '#ff4757',
-            green: '#2ed573',
-            yellow: '#ffa502',
-            blue: '#1e90ff',
-            white: '#ffffff',
-            border: '#2f3542',
-            bg: '#f1f2f6'
-        };
-
-        const playerColors = ['Qizil', 'Yashil', 'Sariq', 'Ko\'k'];
-        const playerHex = [colors.red, colors.green, colors.yellow, colors.blue];
-        let currentTurn = 0;
-
-        // Doskani chizish funksiyasi
-        function drawBoard() {
-            ctx.clearRect(0, 0, size, size);
-
-            // Fon
-            ctx.fillStyle = colors.bg;
-            ctx.fillRect(0, 0, size, size);
-
-            // Katta burchak uylari
-            drawHomeBase(0, 0, colors.red);
-            drawHomeBase(9 * box, 0, colors.green);
-            drawHomeBase(9 * box, 9 * box, colors.yellow);
-            drawHomeBase(0, 9 * box, colors.blue);
-
-            // Yo'lakchalar (Grid)
-            ctx.strokeStyle = colors.border;
-            ctx.lineWidth = 1;
-
-            for (let i = 0; i < 15; i++) {
-                for (let j = 0; j < 15; j++) {
-                    // Faqat yo'lak bo'ladigan joylarga katak chiziladi
-                    if (
-                        (i >= 6 && i <= 8) || 
-                        (j >= 6 && j <= 8)
-                    ) {
-                        ctx.strokeRect(i * box, j * box, box, box);
-                    }
-                }
-            }
-
-            // Marra (Center Finish Zone)
-            drawCenter();
-
-            // Uylar yo'lakchasi va xavfsiz zonalar
-            colorPath();
-        }
-
-        function drawHomeBase(x, y, color) {
-            ctx.fillStyle = color;
-            ctx.fillRect(x, y, 6 * box, 6 * box);
-
-            // Ichki oq ramka
-            ctx.fillStyle = colors.white;
-            ctx.fillRect(x + box, y + box, 4 * box, 4 * box);
-
-            // Donachalar joyi (Circles)
-            const circles = [
-                {cx: x + 2 * box, cy: y + 2 * box},
-                {cx: x + 4 * box, cy: y + 2 * box},
-                {cx: x + 2 * box, cy: y + 4 * box},
-                {cx: x + 4 * box, cy: y + 4 * box}
-            ];
-
-            circles.forEach(c => {
-                ctx.beginPath();
-                ctx.arc(c.cx, c.cy, box * 0.6, 0, Math.PI * 2);
-                ctx.fillStyle = color;
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            });
-        }
-
-        function drawCenter() {
-            const cX = 7.5 * box;
-            const cY = 7.5 * box;
-
-            // Qizil uchburchak
-            drawTriangle(6*box, 6*box, 6*box, 9*box, cX, cY, colors.red);
-            // Yashil uchburchak
-            drawTriangle(6*box, 6*box, 9*box, 6*box, cX, cY, colors.green);
-            // Sariq uchburchak
-            drawTriangle(9*box, 6*box, 9*box, 9*box, cX, cY, colors.yellow);
-            // Ko'k uchburchak
-            drawTriangle(6*box, 9*box, 9*box, 9*box, cX, cY, colors.blue);
-        }
-
-        function drawTriangle(x1, y1, x2, y2, x3, y3, color) {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.lineTo(x3, y3);
-            ctx.closePath();
-            ctx.fillStyle = color;
-            ctx.fill();
-        }
-
-        function colorPath() {
-            // Qizil yo'lak
-            for(let i = 1; i < 6; i++) fillCell(i, 7, colors.red);
-            fillCell(1, 6, colors.red); // Start cell
-
-            // Yashil yo'lak
-            for(let j = 1; j < 6; j++) fillCell(7, j, colors.green);
-            fillCell(8, 1, colors.green);
-
-            // Sariq yo'lak
-            for(let i = 9; i < 14; i++) fillCell(i, 7, colors.yellow);
-            fillCell(13, 8, colors.yellow);
-
-            // Ko'k yo'lak
-            for(let j = 9; j < 14; j++) fillCell(7, j, colors.blue);
-            fillCell(6, 13, colors.blue);
-        }
-
-        function fillCell(x, y, color) {
-            ctx.fillStyle = color;
-            ctx.fillRect(x * box, y * box, box, box);
-            ctx.strokeRect(x * box, y * box, box, box);
-        }
-
-        // Zar tashlash mantiqi
-        function rollDice() {
-            const diceEl = document.getElementById('diceValue');
-            const turnText = document.getElementById('turnText');
-            
-            // Animatsiya effekti
-            let count = 0;
-            const interval = setInterval(() => {
-                diceEl.innerText = Math.floor(Math.random() * 6) + 1;
-                count++;
-                if(count > 8) {
-                    clearInterval(interval);
-                    const finalValue = Math.floor(Math.random() * 6) + 1;
-                    diceEl.innerText = finalValue;
-                    
-                    // Navbatni almashtirish
-                    currentTurn = (currentTurn + 1) % 4;
-                    turnText.innerHTML = `Navbat: <span style="color: ${playerHex[currentTurn]};">${playerColors[currentTurn]}</span>`;
-                }
-            }, 50);
-        }
-
-        // Dastlabki yuklash
-        drawBoard();
+        const tg = window.Telegram.WebApp;
+        tg.expand();
     </script>
 </body>
 </html>
