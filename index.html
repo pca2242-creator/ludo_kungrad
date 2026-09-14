@@ -3,141 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Ludo O'yini</title>
+    <title>Ludo King - Modern Design</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f2f5;
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f, #0f0f1a);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             padding: 20px;
         }
+
         h1 {
-            color: #333;
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #ff4e50, #f9d423);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        #game-container {
+
+        .game-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .board {
-            display: grid;
-            grid-template-columns: repeat(5, 60px);
-            grid-template-rows: repeat(5, 60px);
-            gap: 5px;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+        canvas {
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background-color: #ffffff;
         }
-        .cell {
-            width: 60px;
-            height: 60px;
-            background-color: #e4e6eb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-        .token {
-            width: 40px;
-            height: 40px;
-            background-color: #ff4757;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
+
         .controls {
-            margin-top: 15px;
-        }
-        button {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            justify-content: space-between;
             padding: 10px 20px;
-            font-size: 16px;
-            background-color: #2ed573;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+        }
+
+        .turn-indicator {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .dice-btn {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
             color: white;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #26af5f;
-        }
-        #dice-result {
-            font-size: 20px;
-            margin-top: 10px;
+            padding: 12px 28px;
+            font-size: 1.1rem;
             font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .dice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 65, 108, 0.6);
+        }
+
+        .dice-btn:active {
+            transform: translateY(1px);
+        }
+
+        .dice-result {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            color: #333;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
-    <h1>Mini Ludo O'yini (Boshlang'ich Namuna)</h1>
-    
-    <div id="game-container">
-        <!-- 5x5 katakli soddalashtirilgan yo'l -->
-        <div class="board" id="board">
-            <!-- Kataklar JavaScript orqali to'ldiriladi -->
-        </div>
+    <h1>LUDO KING</h1>
 
+    <div class="game-container">
+        <canvas id="ludoCanvas" width="500" height="500"></canvas>
+        
         <div class="controls">
-            <button onclick="rollDice()">Zar tashlash</button>
-            <div id="dice-result">Zar: -</div>
+            <div class="turn-indicator" id="turnText">Navbat: <span style="color: #ff4757;">Qizil</span></div>
+            <button class="dice-btn" onclick="rollDice()">Zar tashlash ??</button>
+            <div class="dice-result" id="diceValue">-</div>
         </div>
     </div>
 
     <script>
-        const boardSize = 25; // 5x5 katak
-        let tokenPosition = 0; // Figuraning hozirgi katagi (0 dan 24 gacha)
-        let diceValue = 0;
+        const canvas = document.getElementById('ludoCanvas');
+        const ctx = canvas.getContext('2d');
+        const size = canvas.width;
+        const box = size / 15;
 
-        const board = document.getElementById('board');
-        const diceResult = document.getElementById('dice-result');
+        // Ranglar palitrasi (Modern Premium Style)
+        const colors = {
+            red: '#ff4757',
+            green: '#2ed573',
+            yellow: '#ffa502',
+            blue: '#1e90ff',
+            white: '#ffffff',
+            border: '#2f3542',
+            bg: '#f1f2f6'
+        };
 
-        // Taxtani chizish
-        function createBoard() {
-            board.innerHTML = '';
-            for (let i = 0; i < boardSize; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.id = `cell-${i}`;
-                cell.innerText = i;
+        const playerColors = ['Qizil', 'Yashil', 'Sariq', 'Ko\'k'];
+        const playerHex = [colors.red, colors.green, colors.yellow, colors.blue];
+        let currentTurn = 0;
 
-                // Agar shu katakda figura bo'lsa, unga figura qo'shamiz
-                if (i === tokenPosition) {
-                    const token = document.createElement('div');
-                    token.classList.add('token');
-                    token.innerText = 'P';
-                    cell.appendChild(token);
+        // Doskani chizish funksiyasi
+        function drawBoard() {
+            ctx.clearRect(0, 0, size, size);
+
+            // Fon
+            ctx.fillStyle = colors.bg;
+            ctx.fillRect(0, 0, size, size);
+
+            // Katta burchak uylari
+            drawHomeBase(0, 0, colors.red);
+            drawHomeBase(9 * box, 0, colors.green);
+            drawHomeBase(9 * box, 9 * box, colors.yellow);
+            drawHomeBase(0, 9 * box, colors.blue);
+
+            // Yo'lakchalar (Grid)
+            ctx.strokeStyle = colors.border;
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i < 15; i++) {
+                for (let j = 0; j < 15; j++) {
+                    // Faqat yo'lak bo'ladigan joylarga katak chiziladi
+                    if (
+                        (i >= 6 && i <= 8) || 
+                        (j >= 6 && j <= 8)
+                    ) {
+                        ctx.strokeRect(i * box, j * box, box, box);
+                    }
                 }
-
-                board.appendChild(cell);
             }
+
+            // Marra (Center Finish Zone)
+            drawCenter();
+
+            // Uylar yo'lakchasi va xavfsiz zonalar
+            colorPath();
         }
 
-        // Zar tashlash funksiyasi
+        function drawHomeBase(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 6 * box, 6 * box);
+
+            // Ichki oq ramka
+            ctx.fillStyle = colors.white;
+            ctx.fillRect(x + box, y + box, 4 * box, 4 * box);
+
+            // Donachalar joyi (Circles)
+            const circles = [
+                {cx: x + 2 * box, cy: y + 2 * box},
+                {cx: x + 4 * box, cy: y + 2 * box},
+                {cx: x + 2 * box, cy: y + 4 * box},
+                {cx: x + 4 * box, cy: y + 4 * box}
+            ];
+
+            circles.forEach(c => {
+                ctx.beginPath();
+                ctx.arc(c.cx, c.cy, box * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+        }
+
+        function drawCenter() {
+            const cX = 7.5 * box;
+            const cY = 7.5 * box;
+
+            // Qizil uchburchak
+            drawTriangle(6*box, 6*box, 6*box, 9*box, cX, cY, colors.red);
+            // Yashil uchburchak
+            drawTriangle(6*box, 6*box, 9*box, 6*box, cX, cY, colors.green);
+            // Sariq uchburchak
+            drawTriangle(9*box, 6*box, 9*box, 9*box, cX, cY, colors.yellow);
+            // Ko'k uchburchak
+            drawTriangle(6*box, 9*box, 9*box, 9*box, cX, cY, colors.blue);
+        }
+
+        function drawTriangle(x1, y1, x2, y2, x3, y3, color) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x3, y3);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function colorPath() {
+            // Qizil yo'lak
+            for(let i = 1; i < 6; i++) fillCell(i, 7, colors.red);
+            fillCell(1, 6, colors.red); // Start cell
+
+            // Yashil yo'lak
+            for(let j = 1; j < 6; j++) fillCell(7, j, colors.green);
+            fillCell(8, 1, colors.green);
+
+            // Sariq yo'lak
+            for(let i = 9; i < 14; i++) fillCell(i, 7, colors.yellow);
+            fillCell(13, 8, colors.yellow);
+
+            // Ko'k yo'lak
+            for(let j = 9; j < 14; j++) fillCell(7, j, colors.blue);
+            fillCell(6, 13, colors.blue);
+        }
+
+        function fillCell(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * box, y * box, box, box);
+            ctx.strokeRect(x * box, y * box, box, box);
+        }
+
+        // Zar tashlash mantiqi
         function rollDice() {
-            diceValue = Math.floor(Math.random() * 6) + 1;
-            diceResult.innerText = `Zar: ${diceValue}`;
-
-            // Figirani yurish
-            tokenPosition += diceValue;
-            if (tokenPosition >= boardSize) {
-                tokenPosition = boardSize - 1; // Oxirgi katakdan o'tib ketmasa
-                alert("Tabriklaymiz, siz marraga yetib keldingiz!");
-            }
-
-            createBoard();
+            const diceEl = document.getElementById('diceValue');
+            const turnText = document.getElementById('turnText');
+            
+            // Animatsiya effekti
+            let count = 0;
+            const interval = setInterval(() => {
+                diceEl.innerText = Math.floor(Math.random() * 6) + 1;
+                count++;
+                if(count > 8) {
+                    clearInterval(interval);
+                    const finalValue = Math.floor(Math.random() * 6) + 1;
+                    diceEl.innerText = finalValue;
+                    
+                    // Navbatni almashtirish
+                    currentTurn = (currentTurn + 1) % 4;
+                    turnText.innerHTML = `Navbat: <span style="color: ${playerHex[currentTurn]};">${playerColors[currentTurn]}</span>`;
+                }
+            }, 50);
         }
 
-        // Ilk bor taxtani hosil qilish
-        createBoard();
+        // Dastlabki yuklash
+        drawBoard();
     </script>
-
 </body>
 </html>
