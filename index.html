@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Ludo O'yini</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-template-rows: repeat(5, 60px);
+            gap: 5px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: #e4e6eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .token {
+            width: 40px;
+            height: 40px;
+            background-color: #ff4757;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .controls {
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #26af5f;
+        }
+        #dice-result {
+            font-size: 20px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Mini Ludo O'yini (Boshlang'ich Namuna)</h1>
+    
+    <div id="game-container">
+        <!-- 5x5 katakli soddalashtirilgan yo'l -->
+        <div class="board" id="board">
+            <!-- Kataklar JavaScript orqali to'ldiriladi -->
+        </div>
+
+        <div class="controls">
+            <button onclick="rollDice()">Zar tashlash</button>
+            <div id="dice-result">Zar: -</div>
+        </div>
+    </div>
+
+    <script>
+        const boardSize = 25; // 5x5 katak
+        let tokenPosition = 0; // Figuraning hozirgi katagi (0 dan 24 gacha)
+        let diceValue = 0;
+
+        const board = document.getElementById('board');
+        const diceResult = document.getElementById('dice-result');
+
+        // Taxtani chizish
+        function createBoard() {
+            board.innerHTML = '';
+            for (let i = 0; i < boardSize; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.id = `cell-${i}`;
+                cell.innerText = i;
+
+                // Agar shu katakda figura bo'lsa, unga figura qo'shamiz
+                if (i === tokenPosition) {
+                    const token = document.createElement('div');
+                    token.classList.add('token');
+                    token.innerText = 'P';
+                    cell.appendChild(token);
+                }
+
+                board.appendChild(cell);
+            }
+        }
+
+        // Zar tashlash funksiyasi
+        function rollDice() {
+            diceValue = Math.floor(Math.random() * 6) + 1;
+            diceResult.innerText = `Zar: ${diceValue}`;
+
+            // Figirani yurish
+            tokenPosition += diceValue;
+            if (tokenPosition >= boardSize) {
+                tokenPosition = boardSize - 1; // Oxirgi katakdan o'tib ketmasa
+                alert("Tabriklaymiz, siz marraga yetib keldingiz!");
+            }
+
+            createBoard();
+        }
+
+        // Ilk bor taxtani hosil qilish
+        createBoard();
+    </script>
+
+</body>
+</html>
