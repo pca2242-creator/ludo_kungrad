@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Telegram Ludo</title>
+    <title>Ludo Game</title>
     <script src="https://telegram.org"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,38 +12,33 @@
     <div class="game-container">
         <h2>Ludo Kungrad ??</h2>
         
-        <!-- O'YIN TAXTASI -->
+        <!-- LUDO TAXTASI -->
         <div class="ludo-board">
-            
-            <!-- Qizil o'yinchi uyi (Boshlang'ich joyi) -->
-            <div class="player-home red-home">
-                <div class="home-box">
+            <!-- Qizil o'yinchi uyi (Tepada chapda) -->
+            <div class="home red-home">
+                <div class="base-box">
                     <div class="piece red-piece" id="red-p1"></div>
                     <div class="piece red-piece" id="red-p2"></div>
                 </div>
             </div>
             
-            <!-- O'yin yo'lagi (Kataklar) -->
-            <div class="main-path">
-                <div class="step-cell" id="cell-1"></div>
-                <div class="step-cell" id="cell-2"></div>
-                <div class="step-cell" id="cell-3"></div>
-                <div class="step-cell" id="cell-4"></div>
-                <div class="step-cell" id="cell-5"></div>
-                <div class="step-cell" id="cell-6"></div>
+            <!-- Tepadagi tik yo'lak -->
+            <div class="path-vertical">
+                <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+                <div class="cell"></div><div class="cell"></div><div class="cell"></div>
             </div>
             
-            <!-- Ko'k o'yinchi uyi (Boshlang'ich joyi) -->
-            <div class="player-home blue-home">
-                <div class="home-box">
+            <!-- Ko'k o'yinchi uyi (Tepada o'ngda) -->
+            <div class="home blue-home">
+                <div class="base-box">
                     <div class="piece blue-piece" id="blue-p1"></div>
                     <div class="piece blue-piece" id="blue-p2"></div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ALOHIDA KUBIK (ZARK) QISMI -->
+        <!-- PASDA ALOHIDA ZARK (KUBIK) QISMI -->
         <div class="dice-section">
             <p id="turn-text">Navbat: <span style="color: #ff4d4d; font-weight: bold;">Qizil</span></p>
             <div class="dice-box" id="dice-view">1</div>
