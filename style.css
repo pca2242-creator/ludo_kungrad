@@ -115,3 +115,31 @@ button {
     cursor: pointer;
     font-weight: bold;
 }
+/* Yo'lak dizayni */
+.path-area {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 3px;
+    background-color: #333;
+    padding: 2px;
+}
+
+.cell {
+    background-color: #ffffff;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* Tosh katak ichiga tushgandagi o'lchami */
+.cell .piece {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    z-index: 20;
+}
