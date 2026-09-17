@@ -131,8 +131,13 @@
     const SIZE = 360;
     const CELL = SIZE / 15;
 
-    // 0: Red, 1: Green, 2: Yellow, 3: Blue
-    const COLORS = ['#ff4d4d', '#2ecc71', '#f1c40f', '#3498db'];
+    // Ranglar: 0-Qizil, 1-Yashil, 2-Sariq, 3-Ko'k
+    const RED = '#ff4d4d';
+    const GREEN = '#2ecc71';
+    const YELLOW = '#f1c40f';
+    const BLUE = '#3498db';
+
+    const COLORS = [RED, GREEN, YELLOW, BLUE];
     const NAMES = ["Qizil", "Yashil", "Sariq", "Ko'k"];
 
     let turn = 0;
@@ -218,17 +223,19 @@
     function drawBoard() {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
-      // Zonalar ranglari to'g'rilandi:
-      drawSquare(0, 0, 6, COLORS[0]);   // Qizil (Yuqori Chap)
-      drawSquare(9, 0, 6, COLORS[1]);   // Yashil (Yuqori O'ng)
-      drawSquare(0, 9, 6, COLORS[3]);   // Ko'k (Pastki Chap)
-      drawSquare(9, 9, 6, COLORS[2]);   // Sariq (Pastki O'ng)
+      // Katta zonalarning ramkasi (To'g'ri joylashtirildi):
+      drawSquare(0, 0, 6, RED);      // Yuqori Chap -> Qizil
+      drawSquare(0, 9, 6, GREEN);    // Yuqori O'ng -> Yashil
+      drawSquare(9, 0, 6, BLUE);     // Pastki Chap -> Ko'k
+      drawSquare(9, 9, 6, YELLOW);   // Pastki O'ng -> Sariq
 
+      // Ichki oq kvadratlar
       drawSquare(1, 1, 4, '#fff');
-      drawSquare(10, 1, 4, '#fff');
       drawSquare(1, 10, 4, '#fff');
+      drawSquare(10, 1, 4, '#fff');
       drawSquare(10, 10, 4, '#fff');
 
+      // Kataklar to'ri
       for(let r=0; r<15; r++) {
         for(let c=0; c<15; c++) {
           if ((r<6 && c<6) || (r<6 && c>8) || (r>8 && c<6) || (r>8 && c>8)) continue;
@@ -238,19 +245,19 @@
         }
       }
 
-      // Uyga kirish yo'laklari ranglari
+      // Uyga kirish yo'laklari (To'g'ri ranglar):
       for(let i=1; i<=5; i++) {
-        fillCell(7, i, COLORS[0]);     // Qizil yo'lak
-        fillCell(i, 7, COLORS[1]);     // Yashil yo'lak
-        fillCell(7, 14-i, COLORS[2]);  // Sariq yo'lak
-        fillCell(14-i, 7, COLORS[3]);  // Ko'k yo'lak
+        fillCell(7, i, RED);         // Qizil yo'lak
+        fillCell(i, 7, GREEN);       // Yashil yo'lak
+        fillCell(14-i, 7, BLUE);     // Ko'k yo'lak
+        fillCell(7, 14-i, YELLOW);   // Sariq yo'lak
       }
 
       // Boshlang'ich chiqish kataklari
-      fillCell(6, 1, COLORS[0]);
-      fillCell(1, 8, COLORS[1]);
-      fillCell(8, 13, COLORS[2]);
-      fillCell(13, 6, COLORS[3]);
+      fillCell(6, 1, RED);
+      fillCell(1, 8, GREEN);
+      fillCell(13, 6, BLUE);
+      fillCell(8, 13, YELLOW);
 
       drawStars();
       drawCenterHome();
@@ -284,10 +291,10 @@
     function drawCenterHome() {
       let x1 = 6*CELL, x2 = 9*CELL, y1 = 6*CELL, y2 = 9*CELL, xm = 7.5*CELL, ym = 7.5*CELL;
 
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x1, y2); ctx.fillStyle = COLORS[0]; ctx.fill();
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y1); ctx.fillStyle = COLORS[1]; ctx.fill();
-      ctx.beginPath(); ctx.moveTo(x2, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = COLORS[2]; ctx.fill();
-      ctx.beginPath(); ctx.moveTo(x1, y2); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = COLORS[3]; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x1, y2); ctx.fillStyle = RED; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y1); ctx.fillStyle = GREEN; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x1, y2); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = BLUE; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x2, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = YELLOW; ctx.fill();
     }
 
     function drawPawns() {
