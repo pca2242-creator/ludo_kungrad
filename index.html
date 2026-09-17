@@ -1,59 +1,182 @@
 ﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ludo Kungrad</title>
-    <script src="https://telegram.org"></script>
-    <link rel="stylesheet" href="style.css?v=3">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Ludo Offline 4 Player</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { font-family: sans-serif; background: #1c2733; color: #fff; text-align: center; padding: 10px; }
+    
+    .status-bar { background: #243142; border-radius: 10px; padding: 12px; margin-bottom: 10px; font-weight: bold; font-size: 16px; }
+    
+    #game-container { display: flex; justify-content: center; align-items: center; margin: 10px 0; }
+    canvas { background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); touch-action: manipulation; }
+
+    .controls { background: #243142; border-radius: 10px; padding: 15px; display: flex; justify-content: space-around; align-items: center; }
+    #dice-btn { background: #2aabee; color: #fff; border: none; padding: 12px 24px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+    #dice-btn:disabled { background: #555; opacity: 0.6; }
+    #dice-val { font-size: 32px; font-weight: bold; min-width: 60px; }
+  </style>
 </head>
 <body>
 
-    <div class="game-container">
-        <h2>Ludo Kungrad 🎲</h2>
-        
-        <div class="ludo-board">
-            <!-- Qizil uy -->
-            <div class="home-zone red-zone">
-                <div class="inner-box" id="red-home">
-                    <div class="piece red-piece" id="red-p1" onclick="movePiece('red', 1)"></div>
-                    <div class="piece red-piece" id="red-p2" onclick="movePiece('red', 2)"></div>
-                </div>
-            </div>
-            
-            <!-- Yo'laklar (Kataklar ichi CSS-da boshqariladi) -->
-            <div class="path-area" id="board-cells">
-                <!-- Kataklar dinamik ravishda JS yoki CSS orqali chiziladi, hozircha oddiy bloklar -->
-            </div>
-            
-            <!-- Yashil uy -->
-            <div class="home-zone green-zone"><div class="inner-box"></div></div>
-            <!-- Sariq uy -->
-            <div class="home-zone yellow-zone"><div class="inner-box"></div></div>
-            
-            <!-- Ko'k uy -->
-            <div class="home-zone blue-zone">
-                <div class="inner-box" id="blue-home">
-                    <div class="piece blue-piece" id="blue-p1" onclick="movePiece('blue', 1)"></div>
-                    <div class="piece blue-piece" id="blue-p2" onclick="movePiece('blue', 2)"></div>
-                </div>
-            </div>
+  <div class="status-bar" id="status-text" style="color: #ff4d4d;">
+    Navbat: Qizil (1-O'yinchi)
+  </div>
 
-            <div class="center-marra">MARRA</div>
-        </div>
+  <div id="game-container">
+    <canvas id="ludoCanvas" width="360" height="360"></canvas>
+  </div>
 
-        <!-- PASTGI ZARK QISMI -->
-        <div class="dice-section">
-            <p id="turn-text">Navbat: <span style="color: #e74c3c; font-weight: bold;">Qizil</span></p>
-            <div class="dice-box" id="dice-view">1</div>
-            <button id="roll-btn" onclick="playTurn()">Zarkni tashlash 🎲</button>
-        </div>
-    </div>
+  <div class="controls">
+    <div id="dice-val">🎲 1</div>
+    <button id="dice-btn" onclick="handleRoll()">Zar tashlash</button>
+  </div>
 
-    <script src="script.js"></script>
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-    </script>
+  <script>
+    const tg = window.Telegram.WebApp;
+    if (tg) tg.expand();
+
+    const canvas = document.getElementById('ludoCanvas');
+    const ctx = canvas.getContext('2d');
+    const SIZE = 360;
+    const CELL = SIZE / 15;
+
+    // Ranglar va Playerlar
+    const PLAYER_COLORS = ['#ff4d4d', '#2ecc71', '#f1c40f', '#3498db'];
+    const PLAYER_NAMES = ["Qizil", "Yashil", "Sariq", "Ko'k"];
+
+    let turn = 0; // 0: Red, 1: Green, 2: Yellow, 3: Blue
+    let dice = 1;
+    let rolled = false;
+
+    // 4 ta player uchun 4 tadan toshlarning pozitsiyalari (-1 = bazada, 0..56 = yo'lda, 99 = marrada)
+    let pawns = [
+      [-1, -1, -1, -1], // Red
+      [-1, -1, -1, -1], // Green
+      [-1, -1, -1, -1], // Yellow
+      [-1, -1, -1, -1]  // Blue
+    ];
+
+    // Boshlang'ich koordinatalar
+    function draw() {
+      ctx.clearRect(0, 0, SIZE, SIZE);
+
+      // 1. Taxta zonalari
+      drawRect(0, 0, 6*CELL, 6*CELL, PLAYER_COLORS[0]);
+      drawRect(9*CELL, 0, 6*CELL, 6*CELL, PLAYER_COLORS[1]);
+      drawRect(0, 9*CELL, 6*CELL, 6*CELL, PLAYER_COLORS[3]);
+      drawRect(9*CELL, 9*CELL, 6*CELL, 6*CELL, PLAYER_COLORS[2]);
+
+      // Ichki oq kvadratlar
+      drawRect(CELL, CELL, 4*CELL, 4*CELL, '#fff');
+      drawRect(10*CELL, CELL, 4*CELL, 4*CELL, '#fff');
+      drawRect(CELL, 10*CELL, 4*CELL, 4*CELL, '#fff');
+      drawRect(10*CELL, 10*CELL, 4*CELL, 4*CELL, '#fff');
+
+      // Setka chizish
+      for(let r=0; r<15; r++) {
+        for(let c=0; c<15; c++) {
+          if ((r<6 && c<6) || (r<6 && c>8) || (r>8 && c<6) || (r>8 && c>8)) continue;
+          ctx.strokeStyle = '#ddd';
+          ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
+        }
+      }
+
+      // 2. Toshlarni chizish (Pawns)
+      for(let p=0; p<4; p++) {
+        for(let i=0; i<4; i++) {
+          let pos = pawns[p][i];
+          let coord = getCoordinates(p, i, pos);
+          drawPawn(coord.x, coord.y, PLAYER_COLORS[p]);
+        }
+      }
+    }
+
+    function drawRect(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w, h);
+    }
+
+    function drawPawn(x, y, color) {
+      ctx.beginPath();
+      ctx.arc(x, y, CELL/2.5, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    // Toshlarning koordinatasini hisoblash
+    function getCoordinates(player, index, pos) {
+      if (pos === -1) {
+        // Bazadagi koordinata
+        const bases = [
+          [{x:2,y:2}, {x:4,y:2}, {x:2,y:4}, {x:4,y:4}],
+          [{x:11,y:2}, {x:13,y:2}, {x:11,y:4}, {x:13,y:4}],
+          [{x:11,y:11}, {x:13,y:11}, {x:11,y:13}, {x:13,y:13}],
+          [{x:2,y:11}, {x:4,y:11}, {x:2,y:13}, {x:4,y:13}]
+        ];
+        let b = bases[player][index];
+        return { x: b.x * CELL, y: b.y * CELL };
+      }
+      // Yo'ldagi harakat soddalashtirilgan namuna
+      return { x: (1 + index) * CELL, y: (1 + player * 3) * CELL };
+    }
+
+    // Zar tashlash
+    function handleRoll() {
+      if (rolled) return;
+      dice = Math.floor(Math.random() * 6) + 1;
+      document.getElementById('dice-val').innerText = `🎲 ${dice}`;
+      rolled = true;
+
+      // Agar zar 6 bo'lmasa va barcha toshlar bazada bo'lsa, navbat o'tadi
+      let hasActivePawn = pawns[turn].some(p => p !== -1);
+      if (dice !== 6 && !hasActivePawn) {
+        setTimeout(nextTurn, 1000);
+      } else {
+        document.getElementById('status-text').innerText = `${PLAYER_NAMES[turn]}: Toshni tanlang va bosing!`;
+      }
+    }
+
+    // Toshni bosib surish (Canvas touch/click)
+    canvas.addEventListener('click', function(e) {
+      if (!rolled) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Toshni chiqarish yoki surish mantig'i
+      for(let i=0; i<4; i++) {
+        if (pawns[turn][i] === -1 && dice === 6) {
+          pawns[turn][i] = 0; // Bazadan chiqarish
+          break;
+        } else if (pawns[turn][i] >= 0) {
+          pawns[turn][i] += dice; // Oldinga surish
+          break;
+        }
+      }
+
+      draw();
+      setTimeout(nextTurn, 500);
+    });
+
+    function nextTurn() {
+      if (dice !== 6) {
+        turn = (turn + 1) % 4;
+      }
+      rolled = false;
+      const status = document.getElementById('status-text');
+      status.innerText = `Navbat: ${PLAYER_NAMES[turn]} (${turn + 1}-O'yinchi)`;
+      status.style.color = PLAYER_COLORS[turn];
+    }
+
+    draw();
+  </script>
 </body>
 </html>
