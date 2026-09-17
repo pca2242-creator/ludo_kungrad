@@ -22,7 +22,7 @@
       justify-content: center;
     }
 
-    /* Modal menyular (Til va Rejim uchun) */
+    /* Modal menyular */
     .overlay-menu {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -33,7 +33,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 15px;
+      gap: 12px;
     }
 
     .overlay-menu h1 {
@@ -44,15 +44,15 @@
     }
 
     .overlay-menu p {
-      margin-bottom: 10px; 
+      margin-bottom: 8px; 
       color: #cbd5e1;
       font-size: 15px;
     }
 
     .menu-btn {
       width: 240px;
-      padding: 14px;
-      font-size: 17px;
+      padding: 12px;
+      font-size: 16px;
       font-weight: bold;
       border: none;
       border-radius: 12px;
@@ -63,9 +63,11 @@
       transition: 0.2s transform;
     }
     .menu-btn:active { transform: scale(0.95); }
+    .menu-btn.danger { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    .menu-btn.secondary { background: linear-gradient(135deg, #7f8c8d, #34495e); }
 
     /* O'yin interfeysi */
-    .game-container { display: none; width: 100%; max-width: 500px; }
+    .game-container { display: none; width: 100%; max-width: 500px; padding-bottom: 50px; }
 
     .status-bar { 
       background: rgba(30, 41, 59, 0.85); 
@@ -137,6 +139,28 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
       touch-action: manipulation; 
     }
+
+    /* Pastki menyu tugmasi va paneli */
+    .bottom-bar {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 90;
+    }
+
+    .bottom-menu-btn {
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f1c40f;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 20px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
   </style>
 </head>
 <body>
@@ -159,7 +183,16 @@
     <button class="menu-btn" id="btn-mode-4" onclick="startGame(4)">👥 4 Players</button>
   </div>
 
-  <!-- 3. O'yin Maydoni -->
+  <!-- 3. In-Game Sozlamalar Menyusi -->
+  <div id="settings-menu" class="overlay-menu" style="display: none;">
+    <h1 id="settings-title">⚙️ SOZLAMALAR</h1>
+    <button class="menu-btn" id="btn-restart" onclick="restartGame()">🔄 Qayta Boshlash</button>
+    <button class="menu-btn" id="btn-change-mode" onclick="openModeMenu()">🎮 Rejimni O'zgartirish</button>
+    <button class="menu-btn" id="btn-change-lang" onclick="openLangMenu()">🌐 Tilni O'zgartirish</button>
+    <button class="menu-btn secondary" id="btn-resume" onclick="closeSettings()">▶️ Davom Etish</button>
+  </div>
+
+  <!-- 4. O'yin Maydoni -->
   <div class="game-container" id="game-ui">
     <div class="status-bar" id="status-text" style="color: #ff4d4d;">
       ...
@@ -190,13 +223,17 @@
         <button class="dice-btn" id="btn-2" style="background: #f1c40f; color:#000;" onclick="handleRoll(2)">🎲 Zar</button>
       </div>
     </div>
+
+    <!-- Pastki Ixcham Menyu Tugmasi -->
+    <div class="bottom-bar">
+      <button class="bottom-menu-btn" id="btn-open-settings" onclick="openSettings()">⚙️ Menyu</button>
+    </div>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     if (tg) tg.expand();
 
-    // Til tarjimalari bazasi
     const TRANSLATIONS = {
       uz: {
         selectMode: "O'yin rejimini tanlang:",
@@ -209,7 +246,13 @@
         rolled: "{p}: Zar ({d}). Toshni bosing!",
         noMove: "{p}: Imkoniyat yo'q! Navbat o'tdi.",
         killed: "💥 {p} raqib toshini urdi! Yana zar bosing.",
-        sixExtra: "{p}: 6 tushdi! Yana zar bosing."
+        sixExtra: "{p}: 6 tushdi! Yana zar bosing.",
+        settingsTitle: "⚙️ SOZLAMALAR",
+        restart: "🔄 Qayta Boshlash",
+        changeMode: "🎮 Rejimni O'zgartirish",
+        changeLang: "🌐 Tilni O'zgartirish",
+        resume: "▶️ Davom Etish",
+        bottomMenu: "⚙️ Menyu"
       },
       qq: {
         selectMode: "O'yın rejimin saylań:",
@@ -222,7 +265,13 @@
         rolled: "{p}: Zar ({d}). Tassha basıń!",
         noMove: "{p}: Imkoniyat joq! Gezek ótti.",
         killed: "💥 {p} dushpan tasın urdı! Jáne zar basıń.",
-        sixExtra: "{p}: 6 tústı! Jáne zar basıń."
+        sixExtra: "{p}: 6 tústı! Jáne zar basıń.",
+        settingsTitle: "⚙️ SAZLAUAR",
+        restart: "🔄 Qaytadan Baslau",
+        changeMode: "🎮 Rejimdi Ózgertiw",
+        changeLang: "🌐 Tildi Ózgertiw",
+        resume: "▶️ Dawam Etiw",
+        bottomMenu: "⚙️ Menyu"
       },
       kk: {
         selectMode: "Ойын режимін таңдаңыз:",
@@ -235,28 +284,69 @@
         rolled: "{p}: Сүйек ({d}). Тасты басыңыз!",
         noMove: "{p}: Мүмкіндік жоқ! Кезек өтті.",
         killed: "💥 {p} қарсыластың тасын ұрды! Тағы сүйек басыңыз.",
-        sixExtra: "{p}: 6 түсті! Тағы сүйек басыңыз."
+        sixExtra: "{p}: 6 түсті! Тағы сүйек басыңыз.",
+        settingsTitle: "⚙️ БАПТАУЛАР",
+        restart: "🔄 Кайта Бастау",
+        changeMode: "🎮 Режимді Өзгерту",
+        changeLang: "🌐 Тілді Өзгерту",
+        resume: "▶️ Жалғастыру",
+        bottomMenu: "⚙️ Мәзір"
       }
     };
 
     let currentLang = 'uz';
+    let currentMode = 4;
 
-    function selectLanguage(lang) {
-      currentLang = lang;
-      const t = TRANSLATIONS[lang];
-
+    function updateLanguageUI() {
+      const t = TRANSLATIONS[currentLang];
       document.getElementById('mode-title-text').innerText = t.selectMode;
       document.getElementById('btn-mode-2').innerText = t.p2;
       document.getElementById('btn-mode-3').innerText = t.p3;
       document.getElementById('btn-mode-4').innerText = t.p4;
 
+      document.getElementById('settings-title').innerText = t.settingsTitle;
+      document.getElementById('btn-restart').innerText = t.restart;
+      document.getElementById('btn-change-mode').innerText = t.changeMode;
+      document.getElementById('btn-change-lang').innerText = t.changeLang;
+      document.getElementById('btn-resume').innerText = t.resume;
+      document.getElementById('btn-open-settings').innerText = t.bottomMenu;
+
       for(let i=0; i<4; i++) {
         document.getElementById(`name-${i}`).innerText = t.names[i];
         document.getElementById(`btn-${i}`).innerText = t.diceBtn;
       }
+    }
 
+    function selectLanguage(lang) {
+      currentLang = lang;
+      updateLanguageUI();
       document.getElementById('lang-menu').style.display = 'none';
       document.getElementById('mode-menu').style.display = 'flex';
+    }
+
+    function openSettings() {
+      document.getElementById('settings-menu').style.display = 'flex';
+    }
+
+    function closeSettings() {
+      document.getElementById('settings-menu').style.display = 'none';
+    }
+
+    function openLangMenu() {
+      closeSettings();
+      document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('lang-menu').style.display = 'flex';
+    }
+
+    function openModeMenu() {
+      closeSettings();
+      document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('mode-menu').style.display = 'flex';
+    }
+
+    function restartGame() {
+      closeSettings();
+      startGame(currentMode);
     }
 
     const canvas = document.getElementById('ludoCanvas');
@@ -307,15 +397,23 @@
     ];
 
     const baseCoords = [
-      [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],       // Red
-      [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],   // Green
-      [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],// Yellow
-      [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]     // Blue
+      [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],
+      [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],
+      [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],
+      [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]
     ];
 
     const boxIds = ['box-red', 'box-green', 'box-yellow', 'box-blue'];
 
     function startGame(mode) {
+      currentMode = mode;
+      pawns = [
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1]
+      ];
+
       if (mode === 2) activePlayers = [0, 2];
       else if (mode === 3) activePlayers = [0, 1, 2];
       else activePlayers = [0, 1, 2, 3];
@@ -335,6 +433,7 @@
 
       playerIndex = 0;
       turn = activePlayers[playerIndex];
+      rolled = false;
       activateTurn();
       drawBoard();
     }
