@@ -11,7 +11,6 @@
     
     .status-bar { background: #243142; border-radius: 10px; padding: 10px; margin-bottom: 10px; font-weight: bold; font-size: 15px; }
 
-    /* Maydon va zarlarning atrofdagi joylashuvi */
     .ludo-wrapper {
       display: grid;
       grid-template-columns: 80px 1fr 80px;
@@ -23,7 +22,6 @@
       justify-items: center;
     }
 
-    /* Zariklar paneli (4 ta burchakda) */
     .p-box {
       width: 100%;
       height: 100%;
@@ -57,7 +55,6 @@
     }
     .dice-btn:disabled { background: #444 !important; opacity: 0.4; cursor: not-allowed; }
 
-    /* Burchak joylashuvlari */
     #box-red { grid-column: 1; grid-row: 1; }
     #box-green { grid-column: 3; grid-row: 1; }
     #box-blue { grid-column: 1; grid-row: 3; }
@@ -148,6 +145,17 @@
 
     const startOffset = [0, 13, 26, 39];
 
+    const safeStars = [
+      {r:6, c:1},  // Qizil chiqish
+      {r:2, c:6},  
+      {r:1, c:8},  // Yashil chiqish
+      {r:6, c:12}, 
+      {r:8, c:13}, // Sariq chiqish
+      {r:12,c:8},  
+      {r:13,c:6},  // Ko'k chiqish
+      {r:8, c:2}   
+    ];
+
     function getPawnCell(player, step) {
       if (step === -1) return null;
       if (step >= 51) {
@@ -164,8 +172,6 @@
     function drawBoard() {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
-      // Zonalarni to'g'ri joylashtirish:
-      // Qizil: Chap Yuqori (0,0), Yashil: O'ng Yuqori (9,0), Ko'k: Chap Past (0,9), Sariq: O'ng Past (9,9)
       drawSquare(0, 0, 6, COLORS[0]);
       drawSquare(9, 0, 6, COLORS[1]);
       drawSquare(0, 9, 6, COLORS[3]);
@@ -185,20 +191,19 @@
         }
       }
 
-      // Marra chiziqlari
       for(let i=1; i<=5; i++) {
         fillCell(7, i, COLORS[0]);
         fillCell(i, 7, COLORS[1]);
-        fillCell(14-i, 7, COLORS[3]);
         fillCell(7, 14-i, COLORS[2]);
+        fillCell(14-i, 7, COLORS[3]);
       }
 
-      // Chiqish nuqtalari
       fillCell(6, 1, COLORS[0]);
       fillCell(1, 8, COLORS[1]);
-      fillCell(13, 6, COLORS[3]);
       fillCell(8, 13, COLORS[2]);
+      fillCell(13, 6, COLORS[3]);
 
+      drawStars();
       drawCenterHome();
       drawPawns();
     }
@@ -213,6 +218,18 @@
       ctx.fillRect(c*CELL, r*CELL, CELL, CELL);
       ctx.strokeStyle = '#ccc';
       ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
+    }
+
+    function drawStars() {
+      ctx.font = `${CELL * 0.7}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      safeStars.forEach(s => {
+        let isColored = (s.r===6&&s.c===1) || (s.r===1&&s.c===8) || (s.r===8&&s.c===13) || (s.r===13&&s.c===6);
+        ctx.fillStyle = isColored ? '#ffffff' : '#f39c12';
+        ctx.fillText('★', s.c * CELL + CELL / 2, s.r * CELL + CELL / 2 + 1);
+      });
     }
 
     function drawCenterHome() {
@@ -268,52 +285,61 @@
       const btn = document.getElementById(`btn-${turn}`);
       btn.innerText = `🎲 ${dice}`;
 
-      let canMove = false;
+      let movablePawns = [];
       for(let i=0; i<4; i++) {
-        if (pawns[turn][i] === -1 && dice === 6) canMove = true;
-        if (pawns[turn][i] >= 0 && pawns[turn][i] + dice <= 56) canMove = true;
+        let step = pawns[turn][i];
+        if (step === -1 && dice === 6) movablePawns.push(i);
+        if (step >= 0 && step + dice <= 56) movablePawns.push(i);
       }
 
-      if (!canMove) {
-        document.getElementById('status-text').innerText = `${NAMES[turn]}: Yurishga imkon yo'q! Navbat o'tdi.`;
+      if (movablePawns.length === 0) {
+        document.getElementById('status-text').innerText = `${NAMES[turn]}: Imkoniyat yo'q! Navbat o'tdi.`;
         setTimeout(nextTurn, 1200);
-      } else {
-        document.getElementById('status-text').innerText = `${NAMES[turn]}: Zar (${dice}). Toshni bosing!`;
+      } 
+      // AVTOMATIK YURISH (1 ta tanlov bo'lsa yoki 6 tushib hamma tosh ichkarida bo'lsa)
+      else if (movablePawns.length === 1) {
+        let pawnIndex = movablePawns[0];
+        setTimeout(() => executeMove(pawnIndex), 400);
+      } 
+      else {
+        document.getElementById('status-text').innerText = `${NAMES[turn]}: Zar (${dice}). Toshni tanlang!`;
       }
     }
 
+    function executeMove(pawnIndex) {
+      let step = pawns[turn][pawnIndex];
+
+      if (step === -1 && dice === 6) {
+        pawns[turn][pawnIndex] = 0; // Avtomatik chiqish
+      } else if (step >= 0 && step + dice <= 56) {
+        pawns[turn][pawnIndex] += dice; // Avtomatik yurish
+      }
+
+      drawBoard();
+
+      if (dice === 6) {
+        rolled = false;
+        document.getElementById('status-text').innerText = `${NAMES[turn]}: 6 tushdi! Yana zar bosing.`;
+        document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
+      } else {
+        setTimeout(nextTurn, 400);
+      }
+    }
+
+    // Qo'lda tanlash (maydonda bir nechta tosh bo'lsa)
     canvas.addEventListener('click', function(e) {
       if (!rolled) return;
 
-      const rect = canvas.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
-
-      let moved = false;
+      let movablePawns = [];
       for(let i=0; i<4; i++) {
         let step = pawns[turn][i];
-        
-        if (step === -1 && dice === 6) {
-          pawns[turn][i] = 0;
-          moved = true;
-          break;
-        } 
-        else if (step >= 0 && step + dice <= 56) {
-          pawns[turn][i] += dice;
-          moved = true;
-          break;
-        }
+        if (step === -1 && dice === 6) movablePawns.push(i);
+        if (step >= 0 && step + dice <= 56) movablePawns.push(i);
       }
 
-      if (moved) {
-        drawBoard();
-        if (dice === 6) {
-          rolled = false;
-          document.getElementById('status-text').innerText = `${NAMES[turn]}: 6 tushdi! Yana zar tashlang.`;
-          document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
-        } else {
-          setTimeout(nextTurn, 400);
-        }
+      if (movablePawns.length > 1) {
+        // Agar bir nechta tosh bo'lsa, birinchisini yuradi
+        executeMove(movablePawns[0]);
       }
     });
 
