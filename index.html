@@ -173,33 +173,67 @@
 
     .p-name { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
     
+    /* ---------------- ZAR VA NUQTALAR DIZAYNI ---------------- */
     .dice-btn {
       border: none;
-      color: #fff;
-      padding: 8px 4px;
-      font-size: 18px;
-      font-weight: 800;
-      border-radius: 10px;
+      background: transparent;
       cursor: pointer;
-      width: 92%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-      display: inline-block;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease-out;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
     }
-    .dice-btn:disabled { background: #475569 !important; opacity: 0.4; cursor: not-allowed; }
+    .dice-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .dice-3d-roll {
+    .dice-face {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(145deg, #ffffff, #e6e6e6);
+      border-radius: 10px;
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.5);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 6px;
+      gap: 2px;
+      align-items: center;
+      justify-items: center;
+      transition: transform 0.1s ease-out;
+      border: 1px solid #ccc;
+    }
+
+    .dice-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #1e293b;
+      border-radius: 50%;
+      visibility: hidden;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.6);
+    }
+
+    /* Qizil va ko'rsatkich nuqtasi stili */
+    .dice-face.red-dot .dice-dot { background-color: #e74c3c; }
+
+    /* Nuqtalarni o'rinlariga ko'ra ko'rsatish */
+    .val-1 .dot-5 { visibility: visible; }
+    .val-2 .dot-1, .val-2 .dot-9 { visibility: visible; }
+    .val-3 .dot-1, .val-3 .dot-5, .val-3 .dot-9 { visibility: visible; }
+    .val-4 .dot-1, .val-4 .dot-3, .val-4 .dot-7, .val-4 .dot-9 { visibility: visible; }
+    .val-5 .dot-1, .val-5 .dot-3, .val-5 .dot-5, .val-5 .dot-7, .val-5 .dot-9 { visibility: visible; }
+    .val-6 .dot-1, .val-6 .dot-3, .val-6 .dot-4, .val-6 .dot-6, .val-6 .dot-7, .val-6 .dot-9 { visibility: visible; }
+
+    .dice-3d-roll .dice-face {
       animation: roll3dEffect 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
     }
 
     @keyframes roll3dEffect {
       0% { transform: scale(1) rotate(0deg) translate(0, 0); }
-      15% { transform: scale(1.25) rotate(-25deg) translate(-3px, -5px); }
-      30% { transform: scale(1.3) rotate(30deg) translate(4px, 3px); }
-      45% { transform: scale(1.2) rotate(-35deg) translate(-4px, -2px); }
-      60% { transform: scale(1.35) rotate(40deg) translate(3px, -4px); }
-      75% { transform: scale(1.15) rotate(-20deg) translate(-2px, 3px); }
+      15% { transform: scale(1.2) rotate(-30deg) translate(-3px, -5px); }
+      30% { transform: scale(1.25) rotate(45deg) translate(4px, 3px); }
+      45% { transform: scale(1.15) rotate(-60deg) translate(-4px, -2px); }
+      60% { transform: scale(1.3) rotate(90deg) translate(3px, -4px); }
+      75% { transform: scale(1.1) rotate(-45deg) translate(-2px, 3px); }
       100% { transform: scale(1) rotate(0deg) translate(0, 0); }
     }
 
@@ -334,12 +368,24 @@
     <div class="ludo-wrapper">
       <div class="p-box" id="box-red">
         <div class="p-name" id="name-0" style="color: #ff3333;">Qizil</div>
-        <button class="dice-btn" id="btn-0" style="background: linear-gradient(135deg, #ff4d4d, #c0392b);" onclick="handleRoll(0)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-0" onclick="handleRoll(0)">
+          <div class="dice-face val-6 red-dot" id="dice-face-0">
+            <div class="dice-dot dot-1"></div><div class="dice-dot dot-2"></div><div class="dice-dot dot-3"></div>
+            <div class="dice-dot dot-4"></div><div class="dice-dot dot-5"></div><div class="dice-dot dot-6"></div>
+            <div class="dice-dot dot-7"></div><div class="dice-dot dot-8"></div><div class="dice-dot dot-9"></div>
+          </div>
+        </button>
       </div>
 
       <div class="p-box" id="box-green">
         <div class="p-name" id="name-1" style="color: #2ecc71;">Yashil</div>
-        <button class="dice-btn" id="btn-1" style="background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleRoll(1)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-1" onclick="handleRoll(1)">
+          <div class="dice-face val-6" id="dice-face-1">
+            <div class="dice-dot dot-1"></div><div class="dice-dot dot-2"></div><div class="dice-dot dot-3"></div>
+            <div class="dice-dot dot-4"></div><div class="dice-dot dot-5"></div><div class="dice-dot dot-6"></div>
+            <div class="dice-dot dot-7"></div><div class="dice-dot dot-8"></div><div class="dice-dot dot-9"></div>
+          </div>
+        </button>
       </div>
 
       <div id="board-container">
@@ -348,12 +394,24 @@
 
       <div class="p-box" id="box-blue">
         <div class="p-name" id="name-3" style="color: #3498db;">Ko'k</div>
-        <button class="dice-btn" id="btn-3" style="background: linear-gradient(135deg, #3498db, #2980b9);" onclick="handleRoll(3)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-3" onclick="handleRoll(3)">
+          <div class="dice-face val-6" id="dice-face-3">
+            <div class="dice-dot dot-1"></div><div class="dice-dot dot-2"></div><div class="dice-dot dot-3"></div>
+            <div class="dice-dot dot-4"></div><div class="dice-dot dot-5"></div><div class="dice-dot dot-6"></div>
+            <div class="dice-dot dot-7"></div><div class="dice-dot dot-8"></div><div class="dice-dot dot-9"></div>
+          </div>
+        </button>
       </div>
 
       <div class="p-box" id="box-yellow">
         <div class="p-name" id="name-2" style="color: #f1c40f;">Sariq</div>
-        <button class="dice-btn" id="btn-2" style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000;" onclick="handleRoll(2)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-2" onclick="handleRoll(2)">
+          <div class="dice-face val-6" id="dice-face-2">
+            <div class="dice-dot dot-1"></div><div class="dice-dot dot-2"></div><div class="dice-dot dot-3"></div>
+            <div class="dice-dot dot-4"></div><div class="dice-dot dot-5"></div><div class="dice-dot dot-6"></div>
+            <div class="dice-dot dot-7"></div><div class="dice-dot dot-8"></div><div class="dice-dot dot-9"></div>
+          </div>
+        </button>
       </div>
     </div>
 
@@ -454,24 +512,19 @@
       });
     }
 
-    // YANGILANDI: Mayin va chiroyli "qitiirt-qitiirt" yog'och zar ovozi
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
 
       const clicks = 5; 
       for (let i = 0; i < clicks; i++) {
-        // Zarning urilib sekinlashishi uchun ritmik kechikish
         const delay = i * 0.055 + Math.random() * 0.015;
-
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
-        // Mayin yog'ochsimon chertilish chastotasi
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(140 + Math.random() * 70, audioCtx.currentTime + delay);
 
-        // Zar chertilishi va to'xtashi uchun envelope
         gain.gain.setValueAtTime(0.35, audioCtx.currentTime + delay);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + 0.035);
 
@@ -567,7 +620,7 @@
         namesVsBot: ["Qizil (Siz)", "Yashil", "Bot (Sariq)", "Ko'k"],
         namesHuman: ["Qizil", "Yashil", "Sariq", "Ko'k"],
         turn: "Navbat: {p} - Zarni bosing!",
-        rolled: "{p}: Zar ({d}). Toshni bosing!",
+        rolled: "{p}: Toshni bosing!",
         noMove: "{p}: Imkoniyat yo'q! Navbat o'tdi.",
         killed: "💥 {p} raqib toshini urdi! Yana zar bosing.",
         homeBonus: "🎯 {p} toshi marraga kirdi! Yana zar bosing.",
@@ -594,7 +647,7 @@
         namesVsBot: ["Qızıl (Siz)", "Jasıl", "Bot (Sarı)", "Kók"],
         namesHuman: ["Qızıl", "Jasıl", "Sarı", "Kók"],
         turn: "Gezek: {p} - Zardı basıń!",
-        rolled: "{p}: Zar ({d}). Tassha basıń!",
+        rolled: "{p}: Tasstı basıń!",
         noMove: "{p}: Imkoniyat joq! Gezek ótti.",
         killed: "💥 {p} dushpan tasın urdı! Jáne zar basıń.",
         homeBonus: "🎯 {p} tası márege kirdi! Jáne zar basıń.",
@@ -621,7 +674,7 @@
         namesVsBot: ["Қызыл (Siz)", "Жасыл", "Bot (Сары)", "Көк"],
         namesHuman: ["Қызыл", "Жасыл", "Сары", "Көк"],
         turn: "Кезек: {p} - Сүйекті басыңыз!",
-        rolled: "{p}: Сүйек ({d}). Тасты басыңыз!",
+        rolled: "{p}: Тасты басыңыз!",
         noMove: "{p}: Мүмкіндік жоқ! Кезек өтті.",
         killed: "💥 {p} қарсыластың тасын ұрды! Тағы сүйек басыңыз.",
         homeBonus: "🎯 {p} тасы мәреге кірді! Тағы сүйек басыңыз.",
@@ -643,6 +696,12 @@
     let currentLang = 'uz';
     let currentMode = 4;
 
+    function setDiceValue(playerIdx, value) {
+      const face = document.getElementById(`dice-face-${playerIdx}`);
+      if (!face) return;
+      face.className = `dice-face val-${value}` + (playerIdx === 0 ? ' red-dot' : '');
+    }
+
     function updateLanguageUI() {
       const t = TRANSLATIONS[currentLang];
       document.getElementById('mode-title-text').innerText = t.selectMode;
@@ -662,7 +721,6 @@
       let nameList = (currentMode === 1) ? t.namesVsBot : t.namesHuman;
       for(let i=0; i<4; i++) {
         document.getElementById(`name-${i}`).innerText = nameList[i];
-        document.getElementById(`btn-${i}`).innerText = "🎲 Zar";
       }
     }
 
@@ -805,6 +863,7 @@
         } else {
           b.style.visibility = 'visible';
           document.getElementById(`btn-${i}`).disabled = true;
+          setDiceValue(i, 6);
         }
       }
 
@@ -1090,14 +1149,16 @@
 
       let rollCount = 0;
       let rollInterval = setInterval(() => {
-        btn.innerText = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
+        let randomVal = Math.floor(Math.random() * 6) + 1;
+        setDiceValue(turn, randomVal);
+
         rollCount++;
         if (rollCount > 10) {
           clearInterval(rollInterval);
           btn.classList.remove('dice-3d-roll');
 
           dice = Math.floor(Math.random() * 6) + 1;
-          btn.innerText = `🎲 ${dice}`;
+          setDiceValue(turn, dice);
 
           let homePawns = [];
           let activePawnsList = [];
@@ -1119,7 +1180,7 @@
             setTimeout(nextTurn, 800);
           } 
           else {
-            document.getElementById('status-text').innerText = t.rolled.replace('{p}', nameList[turn]).replace('{d}', dice);
+            document.getElementById('status-text').innerText = t.rolled.replace('{p}', nameList[turn]);
             
             if (currentMode === 1 && turn === 2) {
               setTimeout(() => {
@@ -1210,21 +1271,18 @@
         if (hasKilled) {
           rolled = false;
           document.getElementById('status-text').innerText = t.killed.replace('{p}', nameList[turn]);
-          document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
           if (currentMode === 1 && turn === 2) {
             setTimeout(() => { handleRoll(2); }, 700);
           }
         } else if (reachedHome) {
           rolled = false;
           document.getElementById('status-text').innerText = t.homeBonus.replace('{p}', nameList[turn]);
-          document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
           if (currentMode === 1 && turn === 2) {
             setTimeout(() => { handleRoll(2); }, 700);
           }
         } else if (dice === 6) {
           rolled = false;
           document.getElementById('status-text').innerText = t.sixExtra.replace('{p}', nameList[turn]);
-          document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
           if (currentMode === 1 && turn === 2) {
             setTimeout(() => { handleRoll(2); }, 700);
           }
@@ -1312,8 +1370,6 @@
     });
 
     function nextTurn() {
-      document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
-      
       do {
         playerIndex = (playerIndex + 1) % activePlayers.length;
         turn = activePlayers[playerIndex];
