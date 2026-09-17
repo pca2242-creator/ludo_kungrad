@@ -146,14 +146,21 @@
     const startOffset = [0, 13, 26, 39];
 
     const safeStars = [
-      {r:6, c:1},  // Qizil chiqish
+      {r:6, c:1},  
       {r:2, c:6},  
-      {r:1, c:8},  // Yashil chiqish
+      {r:1, c:8},  
       {r:6, c:12}, 
-      {r:8, c:13}, // Sariq chiqish
+      {r:8, c:13}, 
       {r:12,c:8},  
-      {r:13,c:6},  // Ko'k chiqish
+      {r:13,c:6},  
       {r:8, c:2}   
+    ];
+
+    const baseCoords = [
+      [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],
+      [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],
+      [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],
+      [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]
     ];
 
     function getPawnCell(player, step) {
@@ -242,13 +249,6 @@
     }
 
     function drawPawns() {
-      const baseCoords = [
-        [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],
-        [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],
-        [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],
-        [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]
-      ];
-
       for(let p=0; p<4; p++) {
         for(let i=0; i<4; i++) {
           let step = pawns[p][i];
@@ -285,24 +285,31 @@
       const btn = document.getElementById(`btn-${turn}`);
       btn.innerText = `🎲 ${dice}`;
 
-      let movablePawns = [];
+      let homePawns = [];
+      let activePawns = [];
+
       for(let i=0; i<4; i++) {
         let step = pawns[turn][i];
-        if (step === -1 && dice === 6) movablePawns.push(i);
-        if (step >= 0 && step + dice <= 56) movablePawns.push(i);
+        if (step === -1) homePawns.push(i);
+        else if (step >= 0 && step + dice <= 56) activePawns.push(i);
       }
 
-      if (movablePawns.length === 0) {
+      // 1. Olti tushdi va uydagi toshni chiqarish kerak bo'lsa (maydonda boshqa tosh bo'lmasa)
+      if (dice === 6 && homePawns.length > 0 && activePawns.length === 0) {
+        setTimeout(() => executeMove(homePawns[0]), 400);
+      }
+      // 2. Maydonda faqat 1 ta tosh harakatda bo'lsa va 6 tushmasa
+      else if (activePawns.length === 1 && dice !== 6) {
+        setTimeout(() => executeMove(activePawns[0]), 400);
+      }
+      // 3. Imkoniyat yo'q
+      else if (activePawns.length === 0 && (dice !== 6 || homePawns.length === 0)) {
         document.getElementById('status-text').innerText = `${NAMES[turn]}: Imkoniyat yo'q! Navbat o'tdi.`;
         setTimeout(nextTurn, 1200);
       } 
-      // AVTOMATIK YURISH (1 ta tanlov bo'lsa yoki 6 tushib hamma tosh ichkarida bo'lsa)
-      else if (movablePawns.length === 1) {
-        let pawnIndex = movablePawns[0];
-        setTimeout(() => executeMove(pawnIndex), 400);
-      } 
+      // 4. Tanlov bor (uydagi toshni chiqarish yoki maydondagini yurish)
       else {
-        document.getElementById('status-text').innerText = `${NAMES[turn]}: Zar (${dice}). Toshni tanlang!`;
+        document.getElementById('status-text').innerText = `${NAMES[turn]}: Zar (${dice}). Toshni bosing!`;
       }
     }
 
@@ -310,9 +317,9 @@
       let step = pawns[turn][pawnIndex];
 
       if (step === -1 && dice === 6) {
-        pawns[turn][pawnIndex] = 0; // Avtomatik chiqish
+        pawns[turn][pawnIndex] = 0; // Uydagilarni navbat bilan chiqarish
       } else if (step >= 0 && step + dice <= 56) {
-        pawns[turn][pawnIndex] += dice; // Avtomatik yurish
+        pawns[turn][pawnIndex] += dice;
       }
 
       drawBoard();
@@ -326,20 +333,36 @@
       }
     }
 
-    // Qo'lda tanlash (maydonda bir nechta tosh bo'lsa)
+    // Taxtadagi toshlarni chertib yurish
     canvas.addEventListener('click', function(e) {
       if (!rolled) return;
 
-      let movablePawns = [];
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      let clickedPawn = -1;
+
       for(let i=0; i<4; i++) {
         let step = pawns[turn][i];
-        if (step === -1 && dice === 6) movablePawns.push(i);
-        if (step >= 0 && step + dice <= 56) movablePawns.push(i);
+        let cell = getPawnCell(turn, step);
+        if (!cell) cell = baseCoords[turn][i];
+
+        let cx = cell.c * CELL + CELL/2;
+        let cy = cell.r * CELL + CELL/2;
+
+        let dist = Math.hypot(clickX - cx, clickY - cy);
+        if (dist < CELL) {
+          clickedPawn = i;
+          break;
+        }
       }
 
-      if (movablePawns.length > 1) {
-        // Agar bir nechta tosh bo'lsa, birinchisini yuradi
-        executeMove(movablePawns[0]);
+      if (clickedPawn !== -1) {
+        let step = pawns[turn][clickedPawn];
+        if ((step === -1 && dice === 6) || (step >= 0 && step + dice <= 56)) {
+          executeMove(clickedPawn);
+        }
       }
     });
 
