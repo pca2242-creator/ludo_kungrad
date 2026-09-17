@@ -454,50 +454,33 @@
       });
     }
 
-    // "ttttrrrrrrttttrrrrrr" - Zar aylanib tushish ovozi
+    // YANGILANDI: Mayin va chiroyli "qitiirt-qitiirt" yog'och zar ovozi
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
-      let now = audioCtx.currentTime;
-      let sequence = [
-        { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 },
-        { type: 'r', dur: 0.08 },
-        { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 },
-        { type: 'r', dur: 0.10 }
-      ];
 
-      let currentTimeOffset = 0;
-      sequence.forEach((item) => {
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        let filter = audioCtx.createBiquadFilter();
+      const clicks = 5; 
+      for (let i = 0; i < clicks; i++) {
+        // Zarning urilib sekinlashishi uchun ritmik kechikish
+        const delay = i * 0.055 + Math.random() * 0.015;
 
-        if (item.type === 't') {
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(750 + Math.random() * 150, now + currentTimeOffset);
-          filter.type = 'highpass';
-          filter.frequency.setValueAtTime(1500, now + currentTimeOffset);
-          gain.gain.setValueAtTime(0.25, now + currentTimeOffset);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + currentTimeOffset + item.dur);
-        } else {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(220, now + currentTimeOffset);
-          osc.frequency.exponentialRampToValueAtTime(120, now + currentTimeOffset + item.dur);
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(800, now + currentTimeOffset);
-          gain.gain.setValueAtTime(0.2, now + currentTimeOffset);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + currentTimeOffset + item.dur);
-        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
 
-        osc.connect(filter);
-        filter.connect(gain);
+        // Mayin yog'ochsimon chertilish chastotasi
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140 + Math.random() * 70, audioCtx.currentTime + delay);
+
+        // Zar chertilishi va to'xtashi uchun envelope
+        gain.gain.setValueAtTime(0.35, audioCtx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + 0.035);
+
+        osc.connect(gain);
         gain.connect(audioCtx.destination);
 
-        osc.start(now + currentTimeOffset);
-        osc.stop(now + currentTimeOffset + item.dur);
-
-        currentTimeOffset += item.dur + 0.015;
-      });
+        osc.start(audioCtx.currentTime + delay);
+        osc.stop(audioCtx.currentTime + delay + 0.035);
+      }
     }
 
     function playStepSound() {
@@ -1232,7 +1215,6 @@
             setTimeout(() => { handleRoll(2); }, 700);
           }
         } else if (reachedHome) {
-          // Marraga to'liq kirgani uchun qo'shimcha zar imkoniyati
           rolled = false;
           document.getElementById('status-text').innerText = t.homeBonus.replace('{p}', nameList[turn]);
           document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
