@@ -20,6 +20,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      perspective: 1000px;
     }
 
     .music-toggle {
@@ -168,25 +169,36 @@
       border: none;
       color: #fff;
       padding: 8px;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       width: 90%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       display: inline-block;
-      transition: transform 0.1s;
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out;
     }
     .dice-btn:disabled { background: #475569 !important; opacity: 0.4; cursor: not-allowed; }
 
-    /* Ludo King Zar Aylanma Animatsiyasi */
-    .dice-rolling {
-      animation: roll3d 0.15s infinite linear;
+    /* 🎲 Realistik Ludo King 3D Zar Aylanma Animatsiyasi */
+    .dice-3d-roll {
+      animation: roll3dEffect 0.6s cubic-bezier(0.25, 1, 0.5, 1);
     }
-    @keyframes roll3d {
-      0% { transform: rotate(0deg) scale(0.9); }
-      50% { transform: rotate(180deg) scale(1.1); }
-      100% { transform: rotate(360deg) scale(0.9); }
+
+    @keyframes roll3dEffect {
+      0% {
+        transform: scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+      }
+      30% {
+        transform: scale(1.35) rotateX(360deg) rotateY(180deg) rotateZ(90deg);
+      }
+      70% {
+        transform: scale(1.2) rotateX(720deg) rotateY(540deg) rotateZ(270deg);
+      }
+      100% {
+        transform: scale(1) rotateX(1080deg) rotateY(720deg) rotateZ(360deg);
+      }
     }
 
     #box-red { grid-column: 1; grid-row: 1; }
@@ -302,7 +314,7 @@
     let audioCtx = null;
     let bgMusicInterval = null;
     let musicOn = true;
-    let isAnimatingMove = false; // Tosh qimirlayotgan bo'lsa tugmalarni bloklash
+    let isAnimatingMove = false;
 
     function initAudio() {
       if (!audioCtx) {
@@ -384,33 +396,53 @@
       });
     }
 
-    // 🎲 LUDO KING ZAR DUMALASH OVOZI
+    // 🎲 YANADA REALISTIK LUDO KING ZAR DUMALASH VA STOLGA TUSHISH OVOZI
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
 
       let now = audioCtx.currentTime;
       
-      // Shiqirlash zarbalari
-      for (let i = 0; i < 8; i++) {
+      // Zar dumalashidagi tezkor ishqalanish tovushlari
+      for (let i = 0; i < 10; i++) {
         let osc = audioCtx.createOscillator();
         let gain = audioCtx.createGain();
 
-        osc.type = i % 2 === 0 ? 'square' : 'triangle';
-        osc.frequency.setValueAtTime(400 + Math.random() * 300, now + i * 0.03);
+        osc.type = i % 2 === 0 ? 'square' : 'sawtooth';
+        osc.frequency.setValueAtTime(300 + Math.random() * 400, now + i * 0.04);
 
-        gain.gain.setValueAtTime(0.2, now + i * 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.03 + 0.02);
+        gain.gain.setValueAtTime(0.15, now + i * 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.03);
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
 
-        osc.start(now + i * 0.03);
-        osc.stop(now + i * 0.03 + 0.02);
+        osc.start(now + i * 0.04);
+        osc.stop(now + i * 0.04 + 0.03);
       }
+
+      // Oxirida zarning stolga kelib tushishi (Impact noise)
+      setTimeout(() => {
+        if (!audioCtx) return;
+        let impactOsc = audioCtx.createOscillator();
+        let impactGain = audioCtx.createGain();
+
+        impactOsc.type = 'triangle';
+        impactOsc.frequency.setValueAtTime(180, audioCtx.currentTime);
+        impactOsc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.08);
+
+        impactGain.gain.setValueAtTime(0.7, audioCtx.currentTime);
+        impactGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+        impactOsc.connect(impactGain);
+        impactGain.connect(audioCtx.destination);
+
+        impactOsc.start();
+        impactOsc.stop(audioCtx.currentTime + 0.08);
+      }, 480);
     }
 
-    // ♟️ LUDO KING REALISTIK TOSH "TAQ" SAKRASH OVOZI
+    // ♟️ LUDO KING REALISTIK TOSH SAKRASH OVOZI
     function playStepSound() {
       initAudio();
       if (!audioCtx) return;
@@ -419,8 +451,8 @@
       let gain = audioCtx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.04);
+      osc.frequency.setValueAtTime(850, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.04);
 
       gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
@@ -874,7 +906,7 @@
       });
     }
 
-    // 🎲 LUDO KING ZARIK ANIMATSIYASI VA DIOMIK ROLLING
+    // 🎲 REALISTIK 3D DUMALASH ANIMATSIYASI VA AUDIO INTEGRATSIYA
     function handleRoll(pIndex) {
       if (pIndex !== turn || rolled || isAnimatingMove) return;
 
@@ -882,16 +914,18 @@
       const t = TRANSLATIONS[currentLang];
       const btn = document.getElementById(`btn-${turn}`);
       
-      btn.classList.add('dice-rolling');
       rolled = true;
+
+      // 3D CSS aylanish klassini qo'shish
+      btn.classList.add('dice-3d-roll');
 
       let rollCount = 0;
       let rollInterval = setInterval(() => {
         btn.innerText = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
         rollCount++;
-        if (rollCount > 8) {
+        if (rollCount > 10) {
           clearInterval(rollInterval);
-          btn.classList.remove('dice-rolling');
+          btn.classList.remove('dice-3d-roll');
 
           dice = Math.floor(Math.random() * 6) + 1;
           btn.innerText = `🎲 ${dice}`;
@@ -919,10 +953,10 @@
             document.getElementById('status-text').innerText = t.rolled.replace('{p}', t.names[turn]).replace('{d}', dice);
           }
         }
-      }, 50);
+      }, 55);
     }
 
-    // ♟️ LUDO KING STEP-BY-STEP TOSH YURISH ANIMATSIYASI
+    // ♟️ STEP-BY-STEP TOSH YURISH ANIMATSIYASI
     function executeMoveAnimated(pawnIndex) {
       if (isAnimatingMove) return;
       isAnimatingMove = true;
@@ -931,7 +965,6 @@
       let startStep = pawns[turn][pawnIndex];
 
       if (startStep === -1 && dice === 6) {
-        // Uyidan birinchi qadamga chiqish
         pawns[turn][pawnIndex] = 0;
         playStepSound();
         drawBoard();
@@ -942,7 +975,6 @@
 
         finishMove(hasKilled);
       } else if (startStep >= 0 && startStep + dice <= 56) {
-        // Qadambaqadam sakrash animatsiyasi
         let currentStepCount = 0;
         let moveInterval = setInterval(() => {
           pawns[turn][pawnIndex]++;
@@ -962,7 +994,7 @@
 
             finishMove(hasKilled);
           }
-        }, 180); // Har bir katakka sakrash tezligi
+        }, 180);
       } else {
         isAnimatingMove = false;
       }
