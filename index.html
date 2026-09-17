@@ -175,12 +175,12 @@
     .dice-btn {
       border: none;
       color: #fff;
-      padding: 8px;
-      font-size: 20px;
-      font-weight: bold;
+      padding: 8px 4px;
+      font-size: 18px;
+      font-weight: 800;
       border-radius: 10px;
       cursor: pointer;
-      width: 90%;
+      width: 92%;
       box-shadow: 0 4px 10px rgba(0,0,0,0.4);
       display: inline-block;
       transform-style: preserve-3d;
@@ -276,12 +276,12 @@
     <div class="ludo-wrapper">
       <div class="p-box" id="box-red">
         <div class="p-name" id="name-0" style="color: #ff3333;">Qizil</div>
-        <button class="dice-btn" id="btn-0" style="background: linear-gradient(135deg, #ff4d4d, #c0392b);" onclick="handleRoll(0)">🎲</button>
+        <button class="dice-btn" id="btn-0" style="background: linear-gradient(135deg, #ff4d4d, #c0392b);" onclick="handleRoll(0)">🎲 Zar</button>
       </div>
 
       <div class="p-box" id="box-green">
         <div class="p-name" id="name-1" style="color: #2ecc71;">Yashil</div>
-        <button class="dice-btn" id="btn-1" style="background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleRoll(1)">🎲</button>
+        <button class="dice-btn" id="btn-1" style="background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleRoll(1)">🎲 Zar</button>
       </div>
 
       <div id="board-container">
@@ -290,12 +290,12 @@
 
       <div class="p-box" id="box-blue">
         <div class="p-name" id="name-3" style="color: #3498db;">Ko'k</div>
-        <button class="dice-btn" id="btn-3" style="background: linear-gradient(135deg, #3498db, #2980b9);" onclick="handleRoll(3)">🎲</button>
+        <button class="dice-btn" id="btn-3" style="background: linear-gradient(135deg, #3498db, #2980b9);" onclick="handleRoll(3)">🎲 Zar</button>
       </div>
 
       <div class="p-box" id="box-yellow">
         <div class="p-name" id="name-2" style="color: #f1c40f;">Sariq</div>
-        <button class="dice-btn" id="btn-2" style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000;" onclick="handleRoll(2)">🎲</button>
+        <button class="dice-btn" id="btn-2" style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000;" onclick="handleRoll(2)">🎲 Zar</button>
       </div>
     </div>
 
@@ -561,7 +561,7 @@
 
       for(let i=0; i<4; i++) {
         document.getElementById(`name-${i}`).innerText = t.names[i];
-        document.getElementById(`btn-${i}`).innerText = "🎲";
+        document.getElementById(`btn-${i}`).innerText = "🎲 Zar";
       }
     }
 
@@ -921,13 +921,16 @@
 
       let rollCount = 0;
       let rollInterval = setInterval(() => {
+        // Aylanish jarayonida tasodifiy sonlarni tez ko'rsatib turish
+        btn.innerText = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
         rollCount++;
         if (rollCount > 8) {
           clearInterval(rollInterval);
           btn.classList.remove('dice-3d-roll');
 
           dice = Math.floor(Math.random() * 6) + 1;
-          btn.innerText = `🎲`;
+          // ZAR USTIDA TUSHGAN SONNI ANIQ QILIB CHIQARISH
+          btn.innerText = `🎲 ${dice}`;
 
           let homePawns = [];
           let activePawnsList = [];
@@ -1005,11 +1008,11 @@
       if (hasKilled) {
         rolled = false;
         document.getElementById('status-text').innerText = t.killed.replace('{p}', t.names[turn]);
-        document.getElementById(`btn-${turn}`).innerText = "🎲";
+        document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
       } else if (dice === 6) {
         rolled = false;
         document.getElementById('status-text').innerText = t.sixExtra.replace('{p}', t.names[turn]);
-        document.getElementById(`btn-${turn}`).innerText = "🎲";
+        document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
       } else {
         setTimeout(nextTurn, 250);
       }
@@ -1049,7 +1052,7 @@
 
     function nextTurn() {
       const t = TRANSLATIONS[currentLang];
-      document.getElementById(`btn-${turn}`).innerText = "🎲";
+      document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
       playerIndex = (playerIndex + 1) % activePlayers.length;
       turn = activePlayers[playerIndex];
       rolled = false;
