@@ -3,37 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Ludo 4 Player Offline</title>
+  <title>Ludo Game HD</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     
     body { 
-      font-family: Arial, sans-serif; 
-      background: #1c2733 url('rasm.jpg') no-repeat center center fixed; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f172a url('https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed; 
       background-size: cover; 
       color: #fff; 
       text-align: center; 
-      padding: 10px; 
+      padding: 10px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-    
+
+    /* Bosh menyu oynasi */
+    #mode-menu {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    #mode-menu h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #f1c40f;
+      text-shadow: 0 2px 10px rgba(241, 196, 15, 0.4);
+    }
+
+    .menu-btn {
+      width: 220px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: 0.2s transform, 0.2s background;
+    }
+    .menu-btn:active { transform: scale(0.95); }
+
+    /* O'yin interfeysi */
+    .game-container { display: none; width: 100%; max-width: 500px; }
+
     .status-bar { 
-      background: rgba(36, 49, 66, 0.9); 
-      border-radius: 10px; 
+      background: rgba(30, 41, 59, 0.85); 
+      border-radius: 12px; 
       padding: 10px; 
-      margin-bottom: 10px; 
+      margin-bottom: 12px; 
       font-weight: bold; 
       font-size: 16px; 
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     .ludo-wrapper {
       display: grid;
       grid-template-columns: 85px 1fr 85px;
       grid-template-rows: 85px 1fr 85px;
-      gap: 5px;
-      max-width: 540px;
-      margin: 0 auto;
+      gap: 8px;
       align-items: center;
       justify-items: center;
     }
@@ -41,84 +85,95 @@
     .p-box {
       width: 100%;
       height: 100%;
-      background: rgba(36, 49, 66, 0.85);
-      border-radius: 10px;
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      opacity: 0.5;
+      opacity: 0.4;
       transition: 0.3s;
       border: 2px solid transparent;
       padding: 5px;
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(6px);
     }
     .p-box.active {
       opacity: 1;
       border-color: #fff;
-      transform: scale(1.05);
+      transform: scale(1.03);
+      box-shadow: 0 0 15px rgba(255,255,255,0.3);
     }
 
     .p-name { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
     .dice-btn {
       border: none;
       color: #fff;
-      padding: 8px 10px;
-      font-size: 15px;
+      padding: 8px;
+      font-size: 14px;
       font-weight: bold;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       width: 90%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    .dice-btn:disabled { background: #444 !important; opacity: 0.4; cursor: not-allowed; }
+    .dice-btn:disabled { background: #475569 !important; opacity: 0.4; cursor: not-allowed; }
 
     #box-red { grid-column: 1; grid-row: 1; }
     #box-green { grid-column: 3; grid-row: 1; }
     #box-blue { grid-column: 1; grid-row: 3; }
     #box-yellow { grid-column: 3; grid-row: 3; }
 
-    #board-container {
-      grid-column: 1 / span 3;
-      grid-row: 2;
-    }
+    #board-container { grid-column: 1 / span 3; grid-row: 2; }
 
     canvas { 
       background: rgba(255, 255, 255, 0.95); 
-      border-radius: 8px; 
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6); 
+      border-radius: 12px; 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
       touch-action: manipulation; 
     }
   </style>
 </head>
 <body>
 
-  <div class="status-bar" id="status-text" style="color: #ff4d4d;">
-    Navbat: Qizil (1-O'yinchi) - Zarni bosing!
+  <!-- Rejim tanlash menyusi -->
+  <div id="mode-menu">
+    <h1>🎲 LUDO KUNGRAD</h1>
+    <p style="margin-bottom: 10px; color: #cbd5e1;">O'yin rejimini tanlang:</p>
+    <button class="menu-btn" onclick="startGame(2)">👥 2 Kishilik</button>
+    <button class="menu-btn" onclick="startGame(3)">👥 3 Kishilik</button>
+    <button class="menu-btn" onclick="startGame(4)">👥 4 Kishilik</button>
   </div>
 
-  <div class="ludo-wrapper">
-    <div class="p-box active" id="box-red" style="background: rgba(59, 24, 24, 0.85);">
-      <div class="p-name" style="color: #ff4d4d;">Qizil</div>
-      <button class="dice-btn" id="btn-0" style="background: #ff4d4d;" onclick="handleRoll(0)">🎲 Zar</button>
+  <!-- O'yin Maydoni -->
+  <div class="game-container" id="game-ui">
+    <div class="status-bar" id="status-text" style="color: #ff4d4d;">
+      Navbat kutilmoqda...
     </div>
 
-    <div class="p-box" id="box-green" style="background: rgba(24, 59, 34, 0.85);">
-      <div class="p-name" style="color: #2ecc71;">Yashil</div>
-      <button class="dice-btn" id="btn-1" style="background: #2ecc71;" onclick="handleRoll(1)" disabled>🎲 Zar</button>
-    </div>
+    <div class="ludo-wrapper">
+      <div class="p-box" id="box-red">
+        <div class="p-name" style="color: #ff4d4d;">Qizil</div>
+        <button class="dice-btn" id="btn-0" style="background: #ff4d4d;" onclick="handleRoll(0)">🎲 Zar</button>
+      </div>
 
-    <div id="board-container">
-      <canvas id="ludoCanvas" width="360" height="360"></canvas>
-    </div>
+      <div class="p-box" id="box-green">
+        <div class="p-name" style="color: #2ecc71;">Yashil</div>
+        <button class="dice-btn" id="btn-1" style="background: #2ecc71;" onclick="handleRoll(1)">🎲 Zar</button>
+      </div>
 
-    <div class="p-box" id="box-blue" style="background: rgba(24, 44, 59, 0.85);">
-      <div class="p-name" style="color: #3498db;">Ko'k</div>
-      <button class="dice-btn" id="btn-3" style="background: #3498db;" onclick="handleRoll(3)" disabled>🎲 Zar</button>
-    </div>
+      <div id="board-container">
+        <canvas id="ludoCanvas" width="360" height="360"></canvas>
+      </div>
 
-    <div class="p-box" id="box-yellow" style="background: rgba(59, 55, 24, 0.85);">
-      <div class="p-name" style="color: #f1c40f;">Sariq</div>
-      <button class="dice-btn" id="btn-2" style="background: #f1c40f; color:#000;" onclick="handleRoll(2)" disabled>🎲 Zar</button>
+      <div class="p-box" id="box-blue">
+        <div class="p-name" style="color: #3498db;">Ko'k</div>
+        <button class="dice-btn" id="btn-3" style="background: #3498db;" onclick="handleRoll(3)">🎲 Zar</button>
+      </div>
+
+      <div class="p-box" id="box-yellow">
+        <div class="p-name" style="color: #f1c40f;">Sariq</div>
+        <button class="dice-btn" id="btn-2" style="background: #f1c40f; color:#000;" onclick="handleRoll(2)">🎲 Zar</button>
+      </div>
     </div>
   </div>
 
@@ -131,8 +186,7 @@
     const SIZE = 360;
     const CELL = SIZE / 15;
 
-    // Ranglar: 0-Qizil, 1-Yashil, 2-Sariq, 3-Ko'k
-    const RED = '#ff4d4d';
+    const RED = '#e74c3c';
     const GREEN = '#2ecc71';
     const YELLOW = '#f1c40f';
     const BLUE = '#3498db';
@@ -140,6 +194,8 @@
     const COLORS = [RED, GREEN, YELLOW, BLUE];
     const NAMES = ["Qizil", "Yashil", "Sariq", "Ko'k"];
 
+    let activePlayers = [0, 1, 2, 3];
+    let playerIndex = 0;
     let turn = 0;
     let dice = 0;
     let rolled = false;
@@ -173,13 +229,53 @@
       {r:8, c:13}, {r:12,c:8}, {r:13,c:6}, {r:8, c:2}   
     ];
 
-    // Baza koordinatalari [0:Red, 1:Green, 2:Yellow, 3:Blue]
     const baseCoords = [
-      [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],       // Red (Yuqori chap)
-      [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],   // Green (Yuqori o'ng)
-      [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],// Yellow (Pastki o'ng)
-      [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]     // Blue (Pastki chap)
+      [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],       // Red
+      [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],   // Green
+      [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],// Yellow
+      [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]     // Blue
     ];
+
+    const boxIds = ['box-red', 'box-green', 'box-yellow', 'box-blue'];
+
+    function startGame(mode) {
+      if (mode === 2) activePlayers = [0, 2]; // Qizil va Sariq
+      else if (mode === 3) activePlayers = [0, 1, 2]; // Qizil, Yashil, Sariq
+      else activePlayers = [0, 1, 2, 3]; // Barchasi
+
+      document.getElementById('mode-menu').style.display = 'none';
+      document.getElementById('game-ui').style.display = 'block';
+
+      // Nofaol o'yinchilar panelini yashirish
+      for(let i=0; i<4; i++) {
+        const b = document.getElementById(boxIds[i]);
+        if (!activePlayers.includes(i)) {
+          b.style.visibility = 'hidden';
+        } else {
+          b.style.visibility = 'visible';
+          document.getElementById(`btn-${i}`).disabled = true;
+        }
+      }
+
+      playerIndex = 0;
+      turn = activePlayers[playerIndex];
+      activateTurn();
+      drawBoard();
+    }
+
+    function activateTurn() {
+      activePlayers.forEach(p => {
+        document.getElementById(boxIds[p]).classList.remove('active');
+        document.getElementById(`btn-${p}`).disabled = true;
+      });
+
+      document.getElementById(boxIds[turn]).classList.add('active');
+      document.getElementById(`btn-${turn}`).disabled = false;
+
+      const status = document.getElementById('status-text');
+      status.innerText = `Navbat: ${NAMES[turn]} - Zarni bosing!`;
+      status.style.color = COLORS[turn];
+    }
 
     function getPawnCell(player, step) {
       if (step === -1) return null;
@@ -203,9 +299,8 @@
       if (isSafeCell(targetCell)) return false;
 
       let killed = false;
-      for (let p = 0; p < 4; p++) {
-        if (p === currentPlayer) continue;
-
+      activePlayers.forEach(p => {
+        if (p === currentPlayer) return;
         for (let i = 0; i < 4; i++) {
           let step = pawns[p][i];
           if (step >= 0 && step < 51) {
@@ -216,44 +311,57 @@
             }
           }
         }
-      }
+      });
       return killed;
     }
 
     function drawBoard() {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
-      // Katta zonalarning ramkasi (To'g'ri joylashtirildi):
-      drawSquare(0, 0, 6, RED);      // Yuqori Chap -> Qizil
-      drawSquare(0, 9, 6, GREEN);    // Yuqori O'ng -> Yashil
-      drawSquare(9, 0, 6, BLUE);     // Pastki Chap -> Ko'k
-      drawSquare(9, 9, 6, YELLOW);   // Pastki O'ng -> Sariq
+      // Asosiy burchak zonalar
+      drawSquare(0, 0, 6, RED);
+      drawSquare(0, 9, 6, GREEN);
+      drawSquare(9, 0, 6, BLUE);
+      drawSquare(9, 9, 6, YELLOW);
 
-      // Ichki oq kvadratlar
-      drawSquare(1, 1, 4, '#fff');
-      drawSquare(1, 10, 4, '#fff');
-      drawSquare(10, 1, 4, '#fff');
-      drawSquare(10, 10, 4, '#fff');
+      // Ichki oq maydonlar
+      drawSquare(1, 1, 4, '#ffffff');
+      drawSquare(1, 10, 4, '#ffffff');
+      drawSquare(10, 1, 4, '#ffffff');
+      drawSquare(10, 10, 4, '#ffffff');
+
+      // Toshlar turadigan joylar (Base spot doiralari)
+      baseCoords.forEach((playerBases, pIdx) => {
+        playerBases.forEach(b => {
+          ctx.beginPath();
+          ctx.arc(b.c * CELL + CELL/2, b.r * CELL + CELL/2, CELL/2.2, 0, Math.PI * 2);
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = COLORS[pIdx];
+          ctx.stroke();
+        });
+      });
 
       // Kataklar to'ri
       for(let r=0; r<15; r++) {
         for(let c=0; c<15; c++) {
           if ((r<6 && c<6) || (r<6 && c>8) || (r>8 && c<6) || (r>8 && c>8)) continue;
-          ctx.strokeStyle = '#ccc';
+          ctx.strokeStyle = '#cbd5e1';
           ctx.lineWidth = 1;
           ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
         }
       }
 
-      // Uyga kirish yo'laklari (To'g'ri ranglar):
+      // Uyga kirish yo'laklari
       for(let i=1; i<=5; i++) {
-        fillCell(7, i, RED);         // Qizil yo'lak
-        fillCell(i, 7, GREEN);       // Yashil yo'lak
-        fillCell(14-i, 7, BLUE);     // Ko'k yo'lak
-        fillCell(7, 14-i, YELLOW);   // Sariq yo'lak
+        fillCell(7, i, RED);
+        fillCell(i, 7, GREEN);
+        fillCell(14-i, 7, BLUE);
+        fillCell(7, 14-i, YELLOW);
       }
 
-      // Boshlang'ich chiqish kataklari
+      // Boshlang'ich kataklar
       fillCell(6, 1, RED);
       fillCell(1, 8, GREEN);
       fillCell(13, 6, BLUE);
@@ -272,12 +380,12 @@
     function fillCell(r, c, color) {
       ctx.fillStyle = color;
       ctx.fillRect(c*CELL, r*CELL, CELL, CELL);
-      ctx.strokeStyle = '#ccc';
+      ctx.strokeStyle = '#cbd5e1';
       ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
     }
 
     function drawStars() {
-      ctx.font = `${CELL * 0.7}px Arial`;
+      ctx.font = `${CELL * 0.75}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
@@ -297,8 +405,9 @@
       ctx.beginPath(); ctx.moveTo(x2, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = YELLOW; ctx.fill();
     }
 
+    // Tiniq va hajmli 3D Toshlarni chizish
     function drawPawns() {
-      for(let p=0; p<4; p++) {
+      activePlayers.forEach(p => {
         for(let i=0; i<4; i++) {
           let step = pawns[p][i];
           let cell = getPawnCell(p, step);
@@ -306,24 +415,39 @@
 
           let cx = cell.c * CELL + CELL/2;
           let cy = cell.r * CELL + CELL/2;
+          let radius = CELL / 2.5;
 
+          // Tashqi soya va chegara
           ctx.beginPath();
-          ctx.arc(cx, cy, CELL/2.6, 0, Math.PI*2);
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
           ctx.fillStyle = COLORS[p];
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+          ctx.shadowBlur = 6;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
           ctx.fill();
-          ctx.lineWidth = 2;
+
+          // Soya effekti uzildi (boshqa elementlarga ta'sir qilmasligi uchun)
+          ctx.shadowColor = 'transparent';
+
+          // Chegara halqasi
+          ctx.lineWidth = 2.5;
           ctx.strokeStyle = '#ffffff';
           ctx.stroke();
 
+          // Ichki jilo (3D effekt)
+          let grad = ctx.createRadialGradient(cx - radius/3, cy - radius/3, 1, cx, cy, radius);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.5, COLORS[p]);
+          grad.addColorStop(1, '#000000');
+
           ctx.beginPath();
-          ctx.arc(cx, cy, CELL/6, 0, Math.PI*2);
-          ctx.fillStyle = '#fff';
+          ctx.arc(cx, cy, radius * 0.75, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
           ctx.fill();
         }
-      }
+      });
     }
-
-    const boxIds = ['box-red', 'box-green', 'box-yellow', 'box-blue'];
 
     function handleRoll(pIndex) {
       if (pIndex !== turn || rolled) return;
@@ -335,21 +459,21 @@
       btn.innerText = `🎲 ${dice}`;
 
       let homePawns = [];
-      let activePawns = [];
+      let activePawnsList = [];
 
       for(let i=0; i<4; i++) {
         let step = pawns[turn][i];
         if (step === -1) homePawns.push(i);
-        else if (step >= 0 && step + dice <= 56) activePawns.push(i);
+        else if (step >= 0 && step + dice <= 56) activePawnsList.push(i);
       }
 
-      if (dice === 6 && homePawns.length > 0 && activePawns.length === 0) {
+      if (dice === 6 && homePawns.length > 0 && activePawnsList.length === 0) {
         setTimeout(() => executeMove(homePawns[0]), 400);
       }
-      else if (activePawns.length === 1 && dice !== 6) {
-        setTimeout(() => executeMove(activePawns[0]), 400);
+      else if (activePawnsList.length === 1 && dice !== 6) {
+        setTimeout(() => executeMove(activePawnsList[0]), 400);
       }
-      else if (activePawns.length === 0 && (dice !== 6 || homePawns.length === 0)) {
+      else if (activePawnsList.length === 0 && (dice !== 6 || homePawns.length === 0)) {
         document.getElementById('status-text').innerText = `${NAMES[turn]}: Imkoniyat yo'q! Navbat o'tdi.`;
         setTimeout(nextTurn, 1200);
       } 
@@ -376,7 +500,7 @@
 
       if (hasKilled) {
         rolled = false;
-        document.getElementById('status-text').innerText = `💥 ${NAMES[turn]} raqib toshini urib oldi! Yana zar bosing.`;
+        document.getElementById('status-text').innerText = `💥 ${NAMES[turn]} raqib toshini urdi! Yana zar bosing.`;
         document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
       } else if (dice === 6) {
         rolled = false;
@@ -420,22 +544,12 @@
     });
 
     function nextTurn() {
-      document.getElementById(boxIds[turn]).classList.remove('active');
-      document.getElementById(`btn-${turn}`).disabled = true;
       document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
-
-      turn = (turn + 1) % 4;
+      playerIndex = (playerIndex + 1) % activePlayers.length;
+      turn = activePlayers[playerIndex];
       rolled = false;
-
-      document.getElementById(boxIds[turn]).classList.add('active');
-      document.getElementById(`btn-${turn}`).disabled = false;
-
-      const status = document.getElementById('status-text');
-      status.innerText = `Navbat: ${NAMES[turn]} (${turn + 1}-O'yinchi)`;
-      status.style.color = COLORS[turn];
+      activateTurn();
     }
-
-    drawBoard();
   </script>
 </body>
 </html>
