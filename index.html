@@ -9,46 +9,101 @@
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body { font-family: Arial, sans-serif; background: #1c2733; color: #fff; text-align: center; padding: 10px; }
     
-    .status-bar { background: #243142; border-radius: 10px; padding: 12px; margin-bottom: 10px; font-weight: bold; font-size: 16px; }
-    
-    #game-container { display: flex; justify-content: center; align-items: center; margin: 10px 0; }
-    canvas { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); touch-action: manipulation; }
+    .status-bar { background: #243142; border-radius: 10px; padding: 10px; margin-bottom: 10px; font-weight: bold; font-size: 15px; }
 
-    /* 4 o'yinchi uchun zar panellari */
-    .players-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-    .player-card { background: #243142; border: 2px solid transparent; border-radius: 10px; padding: 10px; opacity: 0.5; transition: 0.3s; }
-    .player-card.active { opacity: 1; border-color: #fff; transform: scale(1.02); }
-    
-    .dice-btn { color: #fff; border: none; padding: 8px 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 5px; }
-    .dice-btn:disabled { background: #555 !important; opacity: 0.5; cursor: not-allowed; }
+    /* Maydon va zarlarning atrofdagi joylashuvi */
+    .ludo-wrapper {
+      display: grid;
+      grid-template-columns: 80px 1fr 80px;
+      grid-template-rows: 80px 1fr 80px;
+      gap: 5px;
+      max-width: 480px;
+      margin: 0 auto;
+      align-items: center;
+      justify-items: center;
+    }
+
+    /* Zariklar paneli (4 ta burchakda) */
+    .p-box {
+      width: 100%;
+      height: 100%;
+      background: #243142;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.4;
+      transition: 0.3s;
+      border: 2px solid transparent;
+      padding: 5px;
+    }
+    .p-box.active {
+      opacity: 1;
+      border-color: #fff;
+      transform: scale(1.05);
+    }
+
+    .p-name { font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+    .dice-btn {
+      border: none;
+      color: #fff;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 90%;
+    }
+    .dice-btn:disabled { background: #444 !important; opacity: 0.4; cursor: not-allowed; }
+
+    /* Burchak joylashuvlari */
+    #box-red { grid-column: 1; grid-row: 1; }
+    #box-green { grid-column: 3; grid-row: 1; }
+    #box-blue { grid-column: 1; grid-row: 3; }
+    #box-yellow { grid-column: 3; grid-row: 3; }
+
+    #board-container {
+      grid-column: 1 / span 3;
+      grid-row: 2;
+    }
+
+    canvas { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); touch-action: manipulation; }
   </style>
 </head>
 <body>
 
   <div class="status-bar" id="status-text" style="color: #ff4d4d;">
-    Navbat: Qizil (1-O'yinchi) - Zarni tashlang!
+    Navbat: Qizil (1-O'yinchi) - Zarni bosing!
   </div>
 
-  <div id="game-container">
-    <canvas id="ludoCanvas" width="360" height="360"></canvas>
-  </div>
-
-  <!-- Har bir o'yinchi uchun alohida zar paneli -->
-  <div class="players-panel">
-    <div class="player-card active" id="card-0" style="background: #3b1818;">
-      <div style="color: #ff4d4d; font-weight:bold;">1. Qizil</div>
+  <div class="ludo-wrapper">
+    <!-- Qizil Zar (Yuqori Chap) -->
+    <div class="p-box active" id="box-red" style="background: #3b1818;">
+      <div class="p-name" style="color: #ff4d4d;">Qizil</div>
       <button class="dice-btn" id="btn-0" style="background: #ff4d4d;" onclick="handleRoll(0)">🎲 Zar</button>
     </div>
-    <div class="player-card" id="card-1" style="background: #183b22;">
-      <div style="color: #2ecc71; font-weight:bold;">2. Yashil</div>
+
+    <!-- Yashil Zar (Yuqori O'ng) -->
+    <div class="p-box" id="box-green" style="background: #183b22;">
+      <div class="p-name" style="color: #2ecc71;">Yashil</div>
       <button class="dice-btn" id="btn-1" style="background: #2ecc71;" onclick="handleRoll(1)" disabled>🎲 Zar</button>
     </div>
-    <div class="player-card" id="card-3" style="background: #182c3b;">
-      <div style="color: #3498db; font-weight:bold;">4. Ko'k</div>
+
+    <!-- Taxta Maydoni -->
+    <div id="board-container">
+      <canvas id="ludoCanvas" width="300" height="300"></canvas>
+    </div>
+
+    <!-- Ko'k Zar (Pastki Chap) -->
+    <div class="p-box" id="box-blue" style="background: #182c3b;">
+      <div class="p-name" style="color: #3498db;">Ko'k</div>
       <button class="dice-btn" id="btn-3" style="background: #3498db;" onclick="handleRoll(3)" disabled>🎲 Zar</button>
     </div>
-    <div class="player-card" id="card-2" style="background: #3b3718;">
-      <div style="color: #f1c40f; font-weight:bold;">3. Sariq</div>
+
+    <!-- Sariq Zar (Pastki O'ng) -->
+    <div class="p-box" id="box-yellow" style="background: #3b3718;">
+      <div class="p-name" style="color: #f1c40f;">Sariq</div>
       <button class="dice-btn" id="btn-2" style="background: #f1c40f; color:#000;" onclick="handleRoll(2)" disabled>🎲 Zar</button>
     </div>
   </div>
@@ -59,7 +114,7 @@
 
     const canvas = document.getElementById('ludoCanvas');
     const ctx = canvas.getContext('2d');
-    const SIZE = 360;
+    const SIZE = 300;
     const CELL = SIZE / 15;
 
     const COLORS = ['#ff4d4d', '#2ecc71', '#f1c40f', '#3498db'];
@@ -69,7 +124,6 @@
     let dice = 0;
     let rolled = false;
 
-    // Har bir o'yinchining 4 ta toshi (0..56 step, -1 = Baza)
     let pawns = [
       [-1, -1, -1, -1],
       [-1, -1, -1, -1],
@@ -77,7 +131,6 @@
       [-1, -1, -1, -1]
     ];
 
-    // Asosiy xaritadagi 52 ta universal katakcha yo'lagi
     const mainPath = [
       {r:6,c:1}, {r:6,c:2}, {r:6,c:3}, {r:6,c:4}, {r:6,c:5},
       {r:5,c:6}, {r:4,c:6}, {r:3,c:6}, {r:2,c:6}, {r:1,c:6}, {r:0,c:6},
@@ -93,13 +146,10 @@
       {r:7,c:0}, {r:6,c:0}
     ];
 
-    // Har bir rangning boshlanish indeksi va uyga kirish (Marra) yo'li
     const startOffset = [0, 13, 26, 39];
 
     function getPawnCell(player, step) {
-      if (step === -1) return null; // Bazada
-      
-      // Marraga kirish yo'li (51-qadamdan keyin)
+      if (step === -1) return null;
       if (step >= 51) {
         let homeIndex = step - 51;
         if (player === 0) return { r: 7, c: 1 + homeIndex };
@@ -107,8 +157,6 @@
         if (player === 2) return { r: 7, c: 13 - homeIndex };
         if (player === 3) return { r: 13 - homeIndex, c: 7 };
       }
-
-      // Umumiy yo'lak bo'ylab aylanish
       let idx = (startOffset[player] + step) % 52;
       return mainPath[idx];
     }
@@ -116,18 +164,18 @@
     function drawBoard() {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
-      // 1. Uychalarni (Baza) chizish
+      // Zonalarni to'g'ri joylashtirish:
+      // Qizil: Chap Yuqori (0,0), Yashil: O'ng Yuqori (9,0), Ko'k: Chap Past (0,9), Sariq: O'ng Past (9,9)
       drawSquare(0, 0, 6, COLORS[0]);
       drawSquare(9, 0, 6, COLORS[1]);
-      drawSquare(9, 9, 6, COLORS[2]);
       drawSquare(0, 9, 6, COLORS[3]);
+      drawSquare(9, 9, 6, COLORS[2]);
 
       drawSquare(1, 1, 4, '#fff');
       drawSquare(10, 1, 4, '#fff');
-      drawSquare(10, 10, 4, '#fff');
       drawSquare(1, 10, 4, '#fff');
+      drawSquare(10, 10, 4, '#fff');
 
-      // 2. Setka va katakchalarni chizish
       for(let r=0; r<15; r++) {
         for(let c=0; c<15; c++) {
           if ((r<6 && c<6) || (r<6 && c>8) || (r>8 && c<6) || (r>8 && c>8)) continue;
@@ -137,24 +185,21 @@
         }
       }
 
-      // 3. Ortadagi Marraga olib boruvchi Rangli Shiziqlar (Home Paths)
+      // Marra chiziqlari
       for(let i=1; i<=5; i++) {
-        fillCell(7, i, COLORS[0]);  // Qizil marra chizig'i
-        fillCell(i, 7, COLORS[1]);  // Yashil marra chizig'i
-        fillCell(7, 14-i, COLORS[2]);// Sariq marra chizig'i
-        fillCell(14-i, 7, COLORS[3]);// Ko'k marra chizig'i
+        fillCell(7, i, COLORS[0]);
+        fillCell(i, 7, COLORS[1]);
+        fillCell(14-i, 7, COLORS[3]);
+        fillCell(7, 14-i, COLORS[2]);
       }
 
-      // Chiqish katakchalari (Boshlanish nuqtalari)
+      // Chiqish nuqtalari
       fillCell(6, 1, COLORS[0]);
       fillCell(1, 8, COLORS[1]);
-      fillCell(8, 13, COLORS[2]);
       fillCell(13, 6, COLORS[3]);
+      fillCell(8, 13, COLORS[2]);
 
-      // 4. Markaziy Marrani Chizish (Uchburchaklar)
       drawCenterHome();
-
-      // 5. Toshlarni (Pawns) chizish
       drawPawns();
     }
 
@@ -173,18 +218,13 @@
     function drawCenterHome() {
       let x1 = 6*CELL, x2 = 9*CELL, y1 = 6*CELL, y2 = 9*CELL, xm = 7.5*CELL, ym = 7.5*CELL;
 
-      // Qizil
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x1, y2); ctx.fillStyle = COLORS[0]; ctx.fill();
-      // Yashil
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y1); ctx.fillStyle = COLORS[1]; ctx.fill();
-      // Sariq
       ctx.beginPath(); ctx.moveTo(x2, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = COLORS[2]; ctx.fill();
-      // Ko'k
       ctx.beginPath(); ctx.moveTo(x1, y2); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = COLORS[3]; ctx.fill();
     }
 
     function drawPawns() {
-      // Bazadagi toshlar o'rni
       const baseCoords = [
         [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],
         [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],
@@ -196,10 +236,7 @@
         for(let i=0; i<4; i++) {
           let step = pawns[p][i];
           let cell = getPawnCell(p, step);
-
-          if (!cell) {
-            cell = baseCoords[p][i];
-          }
+          if (!cell) cell = baseCoords[p][i];
 
           let cx = cell.c * CELL + CELL/2;
           let cy = cell.r * CELL + CELL/2;
@@ -212,7 +249,6 @@
           ctx.strokeStyle = '#ffffff';
           ctx.stroke();
 
-          // Ichki doira (Tanlab olish oson bo'lishi uchun)
           ctx.beginPath();
           ctx.arc(cx, cy, CELL/6, 0, Math.PI*2);
           ctx.fillStyle = '#fff';
@@ -221,7 +257,8 @@
       }
     }
 
-    // Zar tashlash funksiyasi
+    const boxIds = ['box-red', 'box-green', 'box-yellow', 'box-blue'];
+
     function handleRoll(pIndex) {
       if (pIndex !== turn || rolled) return;
 
@@ -238,14 +275,13 @@
       }
 
       if (!canMove) {
-        document.getElementById('status-text').innerText = `${NAMES[turn]}: Yurishga yurish yo'q! Navbat o'tdi.`;
+        document.getElementById('status-text').innerText = `${NAMES[turn]}: Yurishga imkon yo'q! Navbat o'tdi.`;
         setTimeout(nextTurn, 1200);
       } else {
-        document.getElementById('status-text').innerText = `${NAMES[turn]}: Tashlangan zar (${dice}). Suriladigan toshni bosing!`;
+        document.getElementById('status-text').innerText = `${NAMES[turn]}: Zar (${dice}). Toshni bosing!`;
       }
     }
 
-    // Canvas ustiga bosganda toshni surish
     canvas.addEventListener('click', function(e) {
       if (!rolled) return;
 
@@ -253,21 +289,15 @@
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      let c = Math.floor(clickX / CELL);
-      let r = Math.floor(clickY / CELL);
-
-      // Bosilgan katakdagi toshni topish
       let moved = false;
       for(let i=0; i<4; i++) {
         let step = pawns[turn][i];
         
-        // Bazadan chiqarish (6 chiqaganda)
         if (step === -1 && dice === 6) {
           pawns[turn][i] = 0;
           moved = true;
           break;
         } 
-        // Maydondagi toshni surish
         else if (step >= 0 && step + dice <= 56) {
           pawns[turn][i] += dice;
           moved = true;
@@ -279,27 +309,27 @@
         drawBoard();
         if (dice === 6) {
           rolled = false;
-          document.getElementById('status-text').innerText = `${NAMES[turn]}: 6 tushdi! Yana bir marta zar tashlang.`;
+          document.getElementById('status-text').innerText = `${NAMES[turn]}: 6 tushdi! Yana zar tashlang.`;
           document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
         } else {
-          setTimeout(nextTurn, 500);
+          setTimeout(nextTurn, 400);
         }
       }
     });
 
     function nextTurn() {
-      document.getElementById(`card-${turn}`).classList.remove('active');
+      document.getElementById(boxIds[turn]).classList.remove('active');
       document.getElementById(`btn-${turn}`).disabled = true;
       document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
 
       turn = (turn + 1) % 4;
       rolled = false;
 
-      document.getElementById(`card-${turn}`).classList.add('active');
+      document.getElementById(boxIds[turn]).classList.add('active');
       document.getElementById(`btn-${turn}`).disabled = false;
 
       const status = document.getElementById('status-text');
-      status.innerText = `Navbat: ${NAMES[turn]} (${turn + 1}-O'yinchi) - Zarni bosing!`;
+      status.innerText = `Navbat: ${NAMES[turn]} (${turn + 1}-O'yinchi)`;
       status.style.color = COLORS[turn];
     }
 
