@@ -233,6 +233,62 @@
     const tg = window.Telegram.WebApp;
     if (tg) tg.expand();
 
+    // Web Audio API sintezatsiyasi (Tosh va Zar ovozlari uchun)
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioContext();
+      }
+    }
+
+    // Zar tashlash ovozi
+    function playDiceSound() {
+      initAudio();
+      if (!audioCtx) return;
+
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(120 + Math.random() * 80, audioCtx.currentTime);
+          
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.05);
+        }, i * 40);
+      }
+    }
+
+    // Tosh surish (yurish) ovozi
+    function playMoveSound() {
+      initAudio();
+      if (!audioCtx) return;
+
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    }
+
     const TRANSLATIONS = {
       uz: {
         welcome: "Qoblannin' Ludo oyinina xosh keldin'",
@@ -320,6 +376,7 @@
     }
 
     function selectLanguage(lang) {
+      initAudio();
       currentLang = lang;
       updateLanguageUI();
       document.getElementById('lang-menu').style.display = 'none';
@@ -408,6 +465,7 @@
     const boxIds = ['box-red', 'box-green', 'box-yellow', 'box-blue'];
 
     function startGame(mode) {
+      initAudio();
       currentMode = mode;
       pawns = [
         [-1, -1, -1, -1],
@@ -437,7 +495,6 @@
       turn = activePlayers[playerIndex];
       rolled = false;
 
-      // Xush kelibsiz xabarini ko'rsatib keyin navbat beramiz
       const status = document.getElementById('status-text');
       status.innerText = "Qoblannin' Ludo oyinina xosh keldin'";
       status.style.color = "#f1c40f";
@@ -628,6 +685,7 @@
     function handleRoll(pIndex) {
       if (pIndex !== turn || rolled) return;
 
+      playDiceSound(); // Zar ovozi chalinadi
       const t = TRANSLATIONS[currentLang];
       dice = Math.floor(Math.random() * 6) + 1;
       rolled = true;
@@ -660,6 +718,7 @@
     }
 
     function executeMove(pawnIndex) {
+      playMoveSound(); // Tosh yurish ovozi chalinadi
       const t = TRANSLATIONS[currentLang];
       let step = pawns[turn][pawnIndex];
       let hasKilled = false;
