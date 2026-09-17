@@ -1,574 +1,1057 @@
 ﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Ludo Deluxe Game</title>
-    <style>
-        :root {
-            --red: #ff3b30;
-            --green: #34c759;
-            --yellow: #ffcc00;
-            --blue: #007aff;
-            --bg-dark: #1e1e24;
-            --board-bg: #ffffff;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Qoblannin' Ludo oyini</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    
+    body { 
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #090d16 url('https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed; 
+      background-size: cover; 
+      color: #fff; 
+      text-align: center; 
+      padding: 10px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
 
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            margin: 0;
-            padding: 0;
-        }
+    .music-toggle {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 200;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #f1c40f;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
 
-        body {
-            background-color: var(--bg-dark);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            color: #fff;
-            overflow: hidden;
-        }
+    #start-animation-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(9, 13, 22, 0.95);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            padding: 10px;
-            max-width: 500px;
-            width: 100%;
-        }
+    .anim-title {
+      font-size: 34px;
+      font-weight: 800;
+      color: #f1c40f;
+      text-shadow: 0 0 25px rgba(241, 196, 15, 0.9);
+      animation: pulse 0.8s infinite alternate;
+    }
 
-        .header-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+    .anim-countdown {
+      font-size: 85px;
+      font-weight: bold;
+      color: #3498db;
+      margin-top: 10px;
+      text-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
+      animation: zoom 0.5s infinite alternate;
+    }
 
-        .turn-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
 
-        .turn-badge {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            box-shadow: 0 0 10px currentColor;
-        }
+    @keyframes zoom {
+      from { transform: scale(0.8); opacity: 0.7; }
+      to { transform: scale(1.2); opacity: 1; }
+    }
 
-        #ludo-board {
-            width: 100%;
-            max-width: 440px;
-            aspect-ratio: 1 / 1;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-            border: 4px solid #2d2d38;
-        }
+    .overlay-menu {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(9, 13, 22, 0.94);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
 
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+    .overlay-menu h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+      color: #f1c40f;
+      text-shadow: 0 2px 10px rgba(241, 196, 15, 0.5);
+      padding: 0 15px;
+    }
 
-        .controls-panel {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+    .overlay-menu p {
+      margin-bottom: 8px; 
+      color: #cbd5e1;
+      font-size: 15px;
+    }
 
-        .dice-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+    .menu-btn {
+      width: 250px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      transition: 0.2s transform;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .menu-btn:active { transform: scale(0.95); }
+    .menu-btn.secondary { background: linear-gradient(135deg, #7f8c8d, #34495e); }
 
-        .dice {
-            width: 60px;
-            height: 60px;
-            background: #ffffff;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #222;
-            box-shadow: 0 6px 0 #cbd5e1, 0 10px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
-            position: relative;
-        }
+    .game-container { display: none; width: 100%; max-width: 500px; padding-bottom: 50px; }
 
-        .dice:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #cbd5e1, 0 4px 6px rgba(0,0,0,0.3);
-        }
+    .status-bar { 
+      background: rgba(15, 23, 42, 0.85); 
+      border-radius: 12px; 
+      padding: 10px; 
+      margin-bottom: 12px; 
+      font-weight: bold; 
+      font-size: 15px; 
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
 
-        .dice.rolling {
-            animation: diceSpin 0.15s infinite linear;
-        }
+    .ludo-wrapper {
+      display: grid;
+      grid-template-columns: 85px 1fr 85px;
+      grid-template-rows: 85px 1fr 85px;
+      gap: 8px;
+      align-items: center;
+      justify-items: center;
+    }
 
-        @keyframes diceSpin {
-            0% { transform: rotate(0deg) scale(1.05); }
-            50% { transform: rotate(180deg) scale(0.95); }
-            100% { transform: rotate(360deg) scale(1.05); }
-        }
+    .p-box {
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.4;
+      transition: 0.3s;
+      border: 2px solid transparent;
+      padding: 5px;
+      backdrop-filter: blur(8px);
+    }
+    .p-box.active {
+      opacity: 1;
+      border-color: #ffffff;
+      transform: scale(1.03);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    }
 
-        .btn {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
-            transition: all 0.2s;
-        }
+    .p-name { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+    
+    .dice-btn {
+      border: none;
+      color: #fff;
+      padding: 8px 4px;
+      font-size: 18px;
+      font-weight: 800;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 92%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      display: inline-block;
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out;
+    }
+    .dice-btn:disabled { background: #475569 !important; opacity: 0.4; cursor: not-allowed; }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
-        }
+    .dice-3d-roll {
+      animation: roll3dEffect 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
 
-        .status-text {
-            font-size: 0.95rem;
-            color: #cbd5e1;
-            text-align: center;
-            min-height: 24px;
-        }
-    </style>
+    @keyframes roll3dEffect {
+      0% { transform: scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+      30% { transform: scale(1.35) rotateX(360deg) rotateY(180deg) rotateZ(90deg); }
+      70% { transform: scale(1.2) rotateX(720deg) rotateY(540deg) rotateZ(270deg); }
+      100% { transform: scale(1) rotateX(1080deg) rotateY(720deg) rotateZ(360deg); }
+    }
+
+    #box-red { grid-column: 1; grid-row: 1; }
+    #box-green { grid-column: 3; grid-row: 1; }
+    #box-blue { grid-column: 1; grid-row: 3; }
+    #box-yellow { grid-column: 3; grid-row: 3; }
+
+    #board-container { grid-column: 1 / span 3; grid-row: 2; }
+
+    canvas { 
+      background: #ffffff; 
+      border-radius: 16px; 
+      box-shadow: 0 12px 35px rgba(0,0,0,0.7), 0 0 15px rgba(255, 255, 255, 0.2); 
+      touch-action: manipulation; 
+    }
+
+    .bottom-bar {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 90;
+    }
+
+    .bottom-menu-btn {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #f1c40f;
+      padding: 8px 22px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 20px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+  </style>
 </head>
 <body>
 
-<div class="game-container">
-    <div class="header-panel">
-        <div class="turn-indicator">
-            <div id="turn-badge" class="turn-badge" style="background-color: var(--red); color: var(--red);"></div>
-            <span id="turn-text">Qizil yurishi</span>
-        </div>
-        <button class="btn" onclick="resetGame()">Qayta boshlash</button>
+  <button class="music-toggle" id="music-btn" onclick="toggleMusic()">🎵 Musiqa: ON</button>
+
+  <div id="start-animation-overlay">
+    <div class="anim-title">GAME START!</div>
+    <div class="anim-countdown" id="anim-count">3</div>
+  </div>
+
+  <div id="lang-menu" class="overlay-menu">
+    <h1>Qoblannin' Ludo oyina xosh keldin'</h1>
+    <p>Tilni tanlang / Тілді таңдаңыз / Тилди сайлаңъыз:</p>
+    <button class="menu-btn" onclick="selectLanguage('uz')">🇺🇿 O'zbekcha</button>
+    <button class="menu-btn" onclick="selectLanguage('qq')">🚩 Qaraqalpaqsha</button>
+    <button class="menu-btn" onclick="selectLanguage('kk')">🇰🇿 Qazaqsha</button>
+  </div>
+
+  <div id="mode-menu" class="overlay-menu" style="display: none;">
+    <h1>Qoblannin' Ludo oyina xosh keldin'</h1>
+    <p id="mode-title-text">O'yin rejimini tanlang:</p>
+    <button class="menu-btn" id="btn-mode-2" onclick="startGameWithAnimation(2)">👥 2 Players</button>
+    <button class="menu-btn" id="btn-mode-3" onclick="startGameWithAnimation(3)">👥 3 Players</button>
+    <button class="menu-btn" id="btn-mode-4" onclick="startGameWithAnimation(4)">👥 4 Players</button>
+  </div>
+
+  <div id="settings-menu" class="overlay-menu" style="display: none;">
+    <h1 id="settings-title">⚙️ SOZLAMALAR</h1>
+    <button class="menu-btn" id="btn-restart" onclick="restartGame()">🔄 Qayta Boshlash</button>
+    <button class="menu-btn" id="btn-change-mode" onclick="openModeMenu()">🎮 Rejimni O'zgartirish</button>
+    <button class="menu-btn" id="btn-change-lang" onclick="openLangMenu()">🌐 Tilni O'zgartirish</button>
+    <button class="menu-btn secondary" id="btn-resume" onclick="closeSettings()">▶️ Davom Etish</button>
+  </div>
+
+  <div class="game-container" id="game-ui">
+    <div class="status-bar" id="status-text" style="color: #f1c40f;">
+      Qoblannin' Ludo oyina xosh keldin'
     </div>
 
-    <div id="ludo-board">
-        <canvas id="gameCanvas"></canvas>
+    <div class="ludo-wrapper">
+      <div class="p-box" id="box-red">
+        <div class="p-name" id="name-0" style="color: #ff3333;">Qizil</div>
+        <button class="dice-btn" id="btn-0" style="background: linear-gradient(135deg, #ff4d4d, #c0392b);" onclick="handleRoll(0)">🎲 Zar</button>
+      </div>
+
+      <div class="p-box" id="box-green">
+        <div class="p-name" id="name-1" style="color: #2ecc71;">Yashil</div>
+        <button class="dice-btn" id="btn-1" style="background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleRoll(1)">🎲 Zar</button>
+      </div>
+
+      <div id="board-container">
+        <canvas id="ludoCanvas" width="360" height="360"></canvas>
+      </div>
+
+      <div class="p-box" id="box-blue">
+        <div class="p-name" id="name-3" style="color: #3498db;">Ko'k</div>
+        <button class="dice-btn" id="btn-3" style="background: linear-gradient(135deg, #3498db, #2980b9);" onclick="handleRoll(3)">🎲 Zar</button>
+      </div>
+
+      <div class="p-box" id="box-yellow">
+        <div class="p-name" id="name-2" style="color: #f1c40f;">Sariq</div>
+        <button class="dice-btn" id="btn-2" style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000;" onclick="handleRoll(2)">🎲 Zar</button>
+      </div>
     </div>
 
-    <div class="status-text" id="status-msg">Zar tashlash uchun zarni bosing!</div>
-
-    <div class="controls-panel">
-        <div class="dice-container">
-            <div id="dice" class="dice" onclick="rollDice()">🎲</div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <span style="font-size:0.8rem; color:#94a3b8;">Zar qiymati:</span>
-                <span id="dice-value" style="font-size:1.4rem; font-weight:bold; color:#fff;">-</span>
-            </div>
-        </div>
+    <div class="bottom-bar">
+      <button class="bottom-menu-btn" id="btn-open-settings" onclick="openSettings()">⚙️ Menyu</button>
     </div>
-</div>
+  </div>
 
-<script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  <script>
+    const tg = window.Telegram.WebApp;
+    if (tg) tg.expand();
 
-    function playTickSound() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(300 + Math.random() * 400, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.04);
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let bgMusicInterval = null;
+    let musicOn = true;
+    let isAnimatingMove = false;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new AudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    function playMoveSound() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+    function toggleMusic() {
+      musicOn = !musicOn;
+      const btn = document.getElementById('music-btn');
+      if (musicOn) {
+        btn.innerText = "🎵 Musiqa: ON";
+        startBgMusic();
+      } else {
+        btn.innerText = "🔇 Musiqa: OFF";
+        stopBgMusic();
+      }
+    }
+
+    function startBgMusic() {
+      if (!musicOn || bgMusicInterval) return;
+      initAudio();
+      const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
+      let step = 0;
+      bgMusicInterval = setInterval(() => {
+        if (!musicOn || !audioCtx) return;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(520, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
+        osc.stop(audioCtx.currentTime + 0.3);
+        step++;
+      }, 400);
     }
 
-    const canvas = document.getElementById('gameCanvas');
+    function stopBgMusic() {
+      if (bgMusicInterval) {
+        clearInterval(bgMusicInterval);
+        bgMusicInterval = null;
+      }
+    }
+
+    function playStartIntroSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const introNotes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+      introNotes.forEach((freq, idx) => {
+        setTimeout(() => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.2);
+        }, idx * 120);
+      });
+    }
+
+    function playDiceSound() {
+      initAudio();
+      if (!audioCtx) return;
+      let now = audioCtx.currentTime;
+      for (let i = 0; i < 8; i++) {
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.type = i % 2 === 0 ? 'square' : 'sawtooth';
+        osc.frequency.setValueAtTime(320 + Math.random() * 380, now + i * 0.03);
+        gain.gain.setValueAtTime(0.15, now + i * 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.03 + 0.025);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + i * 0.03);
+        osc.stop(now + i * 0.03 + 0.025);
+      }
+    }
+
+    function playStepSound() {
+      initAudio();
+      if (!audioCtx) return;
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.035);
+      gain.gain.setValueAtTime(0.55, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.035);
+    }
+
+    function playKillSound() {
+      initAudio();
+      if (!audioCtx) return;
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    }
+
+    function playStarSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const starNotes = [523.25, 659.25, 783.99, 1046.50];
+      starNotes.forEach((freq, idx) => {
+        setTimeout(() => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.12);
+        }, idx * 60);
+      });
+    }
+
+    const TRANSLATIONS = {
+      uz: {
+        welcome: "Qoblannin' Ludo oyina xosh keldin'",
+        selectMode: "O'yin rejimini tanlang:",
+        p2: "👥 2 Kishilik",
+        p3: "👥 3 Kishilik",
+        p4: "👥 4 Kishilik",
+        names: ["Qizil", "Yashil", "Sariq", "Ko'k"],
+        turn: "Navbat: {p} - Zarni bosing!",
+        rolled: "{p}: Zar ({d}). Toshni bosing!",
+        noMove: "{p}: Imkoniyat yo'q! Navbat o'tdi.",
+        killed: "💥 {p} raqib toshini urdi! Yana zar bosing.",
+        sixExtra: "{p}: 6 tushdi! Yana zar bosing.",
+        settingsTitle: "⚙️ SOZLAMALAR",
+        restart: "🔄 Qayta Boshlash",
+        changeMode: "🎮 Rejimni O'zgartirish",
+        changeLang: "🌐 Tilni O'zgartirish",
+        resume: "▶️ Davom Etish",
+        bottomMenu: "⚙️ Menyu"
+      },
+      qq: {
+        welcome: "Qoblannin' Ludo oyina xosh keldin'",
+        selectMode: "O'yın rejimin saylań:",
+        p2: "👥 2 Adamlıq",
+        p3: "👥 3 Adamlıq",
+        p4: "👥 4 Adamlıq",
+        names: ["Qızıl", "Jasıl", "Sarı", "Kók"],
+        turn: "Gezek: {p} - Zardı basıń!",
+        rolled: "{p}: Zar ({d}). Tassha basıń!",
+        noMove: "{p}: Imkoniyat joq! Gezek ótti.",
+        killed: "💥 {p} dushpan tasın urdı! Jáne zar basıń.",
+        sixExtra: "{p}: 6 tústı! Jáne zar basıń.",
+        settingsTitle: "⚙️ SAZLAUAR",
+        restart: "🔄 Qaytadan Baslau",
+        changeMode: "🎮 Rejimdi Ózgertiw",
+        changeLang: "🌐 Tildi Ózgertiw",
+        resume: "▶️ Dawam Etiw",
+        bottomMenu: "⚙️ Menyu"
+      },
+      kk: {
+        welcome: "Qoblannin' Ludo oyina xosh keldin'",
+        selectMode: "Ойын режимін таңдаңыз:",
+        p2: "👥 2 Ойыншы",
+        p3: "👥 3 Ойыншы",
+        p4: "👥 4 Ойыншы",
+        names: ["Қызыл", "Жасыл", "Сары", "Көк"],
+        turn: "Кезек: {p} - Сүйекті басыңыз!",
+        rolled: "{p}: Сүйек ({d}). Тасты басыңыз!",
+        noMove: "{p}: Мүмкіндік жоқ! Кезек өтті.",
+        killed: "💥 {p} қарсыластың тасын ұрды! Тағы сүйек басыңыз.",
+        sixExtra: "{p}: 6 түсті! Тағы сүйек басыңыз.",
+        settingsTitle: "⚙️ БАПТАУЛАР",
+        restart: "Кайта Бастау",
+        changeMode: "🎮 Режимді Өзгерту",
+        changeLang: "🌐 Тілді Өзгерту",
+        resume: "▶️ Жалғастыру",
+        bottomMenu: "⚙️ Мәзір"
+      }
+    };
+
+    let currentLang = 'uz';
+    let currentMode = 4;
+
+    function updateLanguageUI() {
+      const t = TRANSLATIONS[currentLang];
+      document.getElementById('mode-title-text').innerText = t.selectMode;
+      document.getElementById('btn-mode-2').innerText = t.p2;
+      document.getElementById('btn-mode-3').innerText = t.p3;
+      document.getElementById('btn-mode-4').innerText = t.p4;
+
+      document.getElementById('settings-title').innerText = t.settingsTitle;
+      document.getElementById('btn-restart').innerText = t.restart;
+      document.getElementById('btn-change-mode').innerText = t.changeMode;
+      document.getElementById('btn-change-lang').innerText = t.changeLang;
+      document.getElementById('btn-resume').innerText = t.resume;
+      document.getElementById('btn-open-settings').innerText = t.bottomMenu;
+
+      for(let i=0; i<4; i++) {
+        document.getElementById(`name-${i}`).innerText = t.names[i];
+        document.getElementById(`btn-${i}`).innerText = "🎲 Zar";
+      }
+    }
+
+    function selectLanguage(lang) {
+      initAudio();
+      currentLang = lang;
+      updateLanguageUI();
+      document.getElementById('lang-menu').style.display = 'none';
+      document.getElementById('mode-menu').style.display = 'flex';
+      startBgMusic();
+    }
+
+    function startGameWithAnimation(mode) {
+      document.getElementById('mode-menu').style.display = 'none';
+      const animOverlay = document.getElementById('start-animation-overlay');
+      const countEl = document.getElementById('anim-count');
+      animOverlay.style.display = 'flex';
+
+      playStartIntroSound();
+
+      let count = 3;
+      countEl.innerText = count;
+
+      let interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countEl.innerText = count;
+        } else {
+          clearInterval(interval);
+          animOverlay.style.display = 'none';
+          startGame(mode);
+        }
+      }, 500);
+    }
+
+    function openSettings() { document.getElementById('settings-menu').style.display = 'flex'; }
+    function closeSettings() { document.getElementById('settings-menu').style.display = 'none'; }
+    function openLangMenu() {
+      closeSettings();
+      document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('lang-menu').style.display = 'flex';
+    }
+    function openModeMenu() {
+      closeSettings();
+      document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('mode-menu').style.display = 'flex';
+    }
+    function restartGame() {
+      closeSettings();
+      startGameWithAnimation(currentMode);
+    }
+
+    const canvas = document.getElementById('ludoCanvas');
     const ctx = canvas.getContext('2d');
-    
-    function resizeCanvas() {
-        const rect = canvas.parentElement.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-        drawBoard();
-    }
+    const SIZE = 360;
+    const CELL = SIZE / 15;
 
-    window.addEventListener('resize', resizeCanvas);
+    const RED = '#ff2a2a';
+    const GREEN = '#10b981';
+    const YELLOW = '#fbbf24';
+    const BLUE = '#3b82f6';
 
-    const COLORS = {
-        red: '#ff3b30', green: '#34c759', yellow: '#ffcc00', blue: '#007aff',
-        white: '#ffffff', path: '#f1f5f9'
-    };
+    const COLORS = [RED, GREEN, YELLOW, BLUE];
 
-    const PLAYERS = ['red', 'green', 'yellow', 'blue'];
-    let currentPlayerIdx = 0;
-    let currentDiceValue = null;
-    let canRoll = true;
+    let activePlayers = [0, 1, 2, 3];
+    let playerIndex = 0;
+    let turn = 0;
+    let dice = 0;
+    let rolled = false;
 
-    const tokens = {
-        red: [-1, -1, -1, -1], green: [-1, -1, -1, -1],
-        yellow: [-1, -1, -1, -1], blue: [-1, -1, -1, -1]
-    };
-
-    function getBoardCellSize() {
-        return canvas.getBoundingClientRect().width / 15;
-    }
-
-    const BASE_CENTERS = {
-        red: [{ x: 2.25, y: 2.25 }, { x: 3.75, y: 2.25 }, { x: 2.25, y: 3.75 }, { x: 3.75, y: 3.75 }],
-        green: [{ x: 11.25, y: 2.25 }, { x: 12.75, y: 2.25 }, { x: 11.25, y: 3.75 }, { x: 12.75, y: 3.75 }],
-        yellow: [{ x: 11.25, y: 11.25 }, { x: 12.75, y: 11.25 }, { x: 11.25, y: 12.75 }, { x: 12.75, y: 12.75 }],
-        blue: [{ x: 2.25, y: 11.25 }, { x: 3.75, y: 11.25 }, { x: 2.25, y: 12.75 }, { x: 3.75, y: 12.75 }]
-    };
-
-    const MAIN_PATH = [
-        {x: 1, y: 6}, {x: 2, y: 6}, {x: 3, y: 6}, {x: 4, y: 6}, {x: 5, y: 6},
-        {x: 6, y: 5}, {x: 6, y: 4}, {x: 6, y: 3}, {x: 6, y: 2}, {x: 6, y: 1}, {x: 6, y: 0},
-        {x: 7, y: 0}, {x: 8, y: 0},
-        {x: 8, y: 1}, {x: 8, y: 2}, {x: 8, y: 3}, {x: 8, y: 4}, {x: 8, y: 5},
-        {x: 9, y: 6}, {x: 10, y: 6}, {x: 11, y: 6}, {x: 12, y: 6}, {x: 13, y: 6}, {x: 14, y: 6},
-        {x: 14, y: 7}, {x: 14, y: 8},
-        {x: 13, y: 8}, {x: 12, y: 8}, {x: 11, y: 8}, {x: 10, y: 8}, {x: 9, y: 8},
-        {x: 8, y: 9}, {x: 8, y: 10}, {x: 8, y: 11}, {x: 8, y: 12}, {x: 8, y: 13}, {x: 8, y: 14},
-        {x: 7, y: 14}, {x: 6, y: 14},
-        {x: 6, y: 13}, {x: 6, y: 12}, {x: 6, y: 11}, {x: 6, y: 10}, {x: 6, y: 9},
-        {x: 5, y: 8}, {x: 4, y: 8}, {x: 3, y: 8}, {x: 2, y: 8}, {x: 1, y: 8}, {x: 0, y: 8},
-        {x: 0, y: 7}, {x: 0, y: 6}
+    let pawns = [
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1]
     ];
 
-    const START_INDEX = { red: 0, green: 13, yellow: 26, blue: 39 };
+    const mainPath = [
+      {r:6,c:1}, {r:6,c:2}, {r:6,c:3}, {r:6,c:4}, {r:6,c:5},
+      {r:5,c:6}, {r:4,c:6}, {r:3,c:6}, {r:2,c:6}, {r:1,c:6}, {r:0,c:6},
+      {r:0,c:7}, {r:0,c:8},
+      {r:1,c:8}, {r:2,c:8}, {r:3,c:8}, {r:4,c:8}, {r:5,c:8},
+      {r:6,c:9}, {r:6,c:10}, {r:6,c:11}, {r:6,c:12}, {r:6,c:13}, {r:6,c:14},
+      {r:7,c:14}, {r:8,c:14},
+      {r:8,c:13}, {r:8,c:12}, {r:8,c:11}, {r:8,c:10}, {r:8,c:9},
+      {r:9,c:8}, {r:10,c:8}, {r:11,c:8}, {r:12,c:8}, {r:13,c:8}, {r:14,c:8},
+      {r:14,c:7}, {r:14,c:6},
+      {r:13,c:6}, {r:12,c:6}, {r:11,c:6}, {r:10,c:6}, {r:9,c:6},
+      {r:8,c:5}, {r:8,c:4}, {r:8,c:3}, {r:8,c:2}, {r:8,c:1}, {r:8,c:0},
+      {r:7,c:0}, {r:6,c:0}
+    ];
+
+    const startOffset = [0, 13, 26, 39];
+
+    const safeStars = [
+      {r:6, c:1}, {r:2, c:6}, {r:1, c:8}, {r:6, c:12}, 
+      {r:8, c:13}, {r:12,c:8}, {r:13,c:6}, {r:8, c:2}   
+    ];
+
+    // BAZADAGI TOSH DOIRALARINI ANIQ MARKAZLASH VA TENG TEKISLASH
+    const baseCoords = [
+      [{r:2.2, c:2.2}, {r:2.2, c:3.8}, {r:3.8, c:2.2}, {r:3.8, c:3.8}], // Qizil
+      [{r:2.2, c:11.2}, {r:2.2, c:12.8}, {r:3.8, c:11.2}, {r:3.8, c:12.8}], // Yashil
+      [{r:11.2, c:11.2}, {r:11.2, c:12.8}, {r:12.8, c:11.2}, {r:12.8, c:12.8}], // Sariq
+      [{r:11.2, c:2.2}, {r:11.2, c:3.8}, {r:12.8, c:2.2}, {r:12.8, c:3.8}]  // Ko'k
+    ];
+
+    const boxIds = ['box-red', 'box-green', 'box-yellow', 'box-blue'];
+
+    function startGame(mode) {
+      initAudio();
+      currentMode = mode;
+      pawns = [
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1],
+        [-1, -1, -1, -1]
+      ];
+
+      if (mode === 2) activePlayers = [0, 2];
+      else if (mode === 3) activePlayers = [0, 1, 2];
+      else activePlayers = [0, 1, 2, 3];
+
+      document.getElementById('game-ui').style.display = 'block';
+
+      for(let i=0; i<4; i++) {
+        const b = document.getElementById(boxIds[i]);
+        if (!activePlayers.includes(i)) {
+          b.style.visibility = 'hidden';
+        } else {
+          b.style.visibility = 'visible';
+          document.getElementById(`btn-${i}`).disabled = true;
+        }
+      }
+
+      playerIndex = 0;
+      turn = activePlayers[playerIndex];
+      rolled = false;
+
+      const status = document.getElementById('status-text');
+      status.innerText = "Qoblannin' Ludo oyina xosh keldin'";
+      status.style.color = "#f1c40f";
+
+      setTimeout(() => { activateTurn(); }, 400);
+      drawBoard();
+    }
+
+    function activateTurn() {
+      activePlayers.forEach(p => {
+        document.getElementById(boxIds[p]).classList.remove('active');
+        document.getElementById(`btn-${p}`).disabled = true;
+      });
+
+      document.getElementById(boxIds[turn]).classList.add('active');
+      document.getElementById(`btn-${turn}`).disabled = false;
+
+      const t = TRANSLATIONS[currentLang];
+      const status = document.getElementById('status-text');
+      status.innerText = t.turn.replace('{p}', t.names[turn]);
+      status.style.color = COLORS[turn];
+    }
+
+    function getPawnCell(player, step) {
+      if (step === -1) return null;
+      if (step >= 51) {
+        let homeIndex = step - 51;
+        if (player === 0) return { r: 7, c: 1 + homeIndex };
+        if (player === 1) return { r: 1 + homeIndex, c: 7 };
+        if (player === 2) return { r: 7, c: 13 - homeIndex };
+        if (player === 3) return { r: 13 - homeIndex, c: 7 };
+      }
+      let idx = (startOffset[player] + step) % 52;
+      return mainPath[idx];
+    }
+
+    function isSafeCell(cell) {
+      if (!cell) return true;
+      return safeStars.some(s => s.r === cell.r && s.c === cell.c);
+    }
+
+    function checkAndKillPawn(targetCell, currentPlayer) {
+      if (!targetCell || isSafeCell(targetCell)) return false;
+
+      let killed = false;
+      activePlayers.forEach(p => {
+        if (p === currentPlayer) return;
+        for (let i = 0; i < 4; i++) {
+          let step = pawns[p][i];
+          if (step >= 0 && step < 51) {
+            let c = getPawnCell(p, step);
+            if (c && c.r === targetCell.r && c.c === targetCell.c) {
+              pawns[p][i] = -1;
+              killed = true;
+            }
+          }
+        }
+      });
+
+      if (killed) playKillSound();
+      return killed;
+    }
 
     function drawBoard() {
-        const rect = canvas.getBoundingClientRect();
-        const S = rect.width / 15;
-        ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.clearRect(0, 0, SIZE, SIZE);
 
-        drawBaseSquare(0, 0, 6, 6, COLORS.red);
-        drawBaseSquare(9, 0, 6, 6, COLORS.green);
-        drawBaseSquare(9, 9, 6, 6, COLORS.yellow);
-        drawBaseSquare(0, 9, 6, 6, COLORS.blue);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, SIZE, SIZE);
 
-        drawHomeBaseCircles(0, 0, COLORS.red, BASE_CENTERS.red, S);
-        drawHomeBaseCircles(9, 0, COLORS.green, BASE_CENTERS.green, S);
-        drawHomeBaseCircles(9, 9, COLORS.yellow, BASE_CENTERS.yellow, S);
-        drawHomeBaseCircles(0, 9, COLORS.blue, BASE_CENTERS.blue, S);
+      drawSquare(0, 0, 6, RED);
+      drawSquare(0, 9, 6, GREEN);
+      drawSquare(9, 0, 6, BLUE);
+      drawSquare(9, 9, 6, YELLOW);
 
-        drawTracks(S);
-        drawCenterTriangle(S);
-        drawAllTokens(S);
-    }
+      drawSquare(1, 1, 4, '#ffffff');
+      drawSquare(1, 10, 4, '#ffffff');
+      drawSquare(10, 1, 4, '#ffffff');
+      drawSquare(10, 10, 4, '#ffffff');
 
-    function drawBaseSquare(gridX, gridY, w, h, color) {
-        const S = getBoardCellSize();
-        ctx.fillStyle = color;
-        ctx.fillRect(gridX * S, gridY * S, w * S, h * S);
-        ctx.strokeStyle = '#2d2d38';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(gridX * S, gridY * S, w * S, h * S);
-    }
-
-    function drawHomeBaseCircles(gridX, gridY, color, centers, S) {
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.roundRect((gridX + 1) * S, (gridY + 1) * S, 4 * S, 4 * S, 12);
-        ctx.fill();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        centers.forEach(c => {
-            ctx.beginPath();
-            ctx.arc(c.x * S, c.y * S, S * 0.5, 0, Math.PI * 2);
-            ctx.fillStyle = color + '22';
-            ctx.fill();
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.stroke();
+      // Baza doiralarini chiroyli va markazlashtirilgan holda chizish
+      baseCoords.forEach((playerBases, pIdx) => {
+        playerBases.forEach(b => {
+          ctx.beginPath();
+          ctx.arc(b.c * CELL, b.r * CELL, CELL / 1.85, 0, Math.PI * 2);
+          ctx.fillStyle = '#f8fafc';
+          ctx.fill();
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = COLORS[pIdx];
+          ctx.stroke();
         });
-    }
+      });
 
-    function drawTracks(S) {
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.lineWidth = 1;
-
-        for (let x = 0; x < 15; x++) {
-            for (let y = 0; y < 15; y++) {
-                if ((x < 6 && y < 6) || (x > 8 && y < 6) || (x < 6 && y > 8) || (x > 8 && y > 8) || (x >= 6 && x <= 8 && y >= 6 && y <= 8)) continue;
-                ctx.fillStyle = COLORS.path;
-                ctx.fillRect(x * S, y * S, S, S);
-                ctx.strokeRect(x * S, y * S, S, S);
-            }
+      for(let r=0; r<15; r++) {
+        for(let c=0; c<15; c++) {
+          if ((r<6 && c<6) || (r<6 && c>8) || (r>8 && c<6) || (r>8 && c>8)) continue;
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
         }
+      }
 
-        fillCell(1, 6, COLORS.red, S);
-        for (let x = 1; x <= 5; x++) fillCell(x, 7, COLORS.red, S);
-        fillCell(8, 1, COLORS.green, S);
-        for (let y = 1; y <= 5; y++) fillCell(7, y, COLORS.green, S);
-        fillCell(13, 8, COLORS.yellow, S);
-        for (let x = 9; x <= 13; x++) fillCell(x, 7, COLORS.yellow, S);
-        fillCell(6, 13, COLORS.blue, S);
-        for (let y = 9; y <= 13; y++) fillCell(7, y, COLORS.blue, S);
+      for(let i=1; i<=5; i++) {
+        fillCell(7, i, RED);
+        fillCell(i, 7, GREEN);
+        fillCell(14-i, 7, BLUE);
+        fillCell(7, 14-i, YELLOW);
+      }
+
+      fillCell(6, 1, RED);
+      fillCell(1, 8, GREEN);
+      fillCell(13, 6, BLUE);
+      fillCell(8, 13, YELLOW);
+
+      drawStars();
+      drawCenterHome();
+      drawPawns();
     }
 
-    function fillCell(x, y, color, S) {
-        ctx.fillStyle = color;
-        ctx.fillRect(x * S, y * S, S, S);
-        ctx.strokeStyle = '#1e1e24';
-        ctx.strokeRect(x * S, y * S, S, S);
+    function drawSquare(r, c, sz, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(c*CELL, r*CELL, sz*CELL, sz*CELL);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(0,0,0,0.15)";
+      ctx.strokeRect(c*CELL, r*CELL, sz*CELL, sz*CELL);
     }
 
-    function drawCenterTriangle(S) {
-        const cx = 7.5 * S, cy = 7.5 * S;
-        const triangles = [
-            { path: [[6, 6], [6, 9]], color: COLORS.red },
-            { path: [[6, 6], [9, 6]], color: COLORS.green },
-            { path: [[9, 6], [9, 9]], color: COLORS.yellow },
-            { path: [[6, 9], [9, 9]], color: COLORS.blue }
-        ];
-
-        triangles.forEach(t => {
-            ctx.beginPath();
-            ctx.moveTo(t.path[0][0] * S, t.path[0][1] * S);
-            ctx.lineTo(t.path[1][0] * S, t.path[1][1] * S);
-            ctx.lineTo(cx, cy);
-            ctx.fillStyle = t.color;
-            ctx.fill();
-        });
+    function fillCell(r, c, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(c*CELL, r*CELL, CELL, CELL);
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
     }
 
-    function getTokenCoords(color, stepIndex, tokenIdx, S) {
-        if (stepIndex === -1) {
-            const pt = BASE_CENTERS[color][tokenIdx];
-            return { x: pt.x * S, y: pt.y * S };
+    function drawStars() {
+      ctx.font = `bold ${CELL * 0.75}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      safeStars.forEach(s => {
+        let isColored = (s.r===6&&s.c===1) || (s.r===1&&s.c===8) || (s.r===8&&s.c===13) || (s.r===13&&s.c===6);
+        ctx.fillStyle = isColored ? '#ffffff' : '#f59e0b';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 4;
+        ctx.fillText('★', s.c * CELL + CELL / 2, s.r * CELL + CELL / 2 + 1);
+        ctx.shadowColor = 'transparent';
+      });
+    }
+
+    function drawCenterHome() {
+      let x1 = 6*CELL, x2 = 9*CELL, y1 = 6*CELL, y2 = 9*CELL, xm = 7.5*CELL, ym = 7.5*CELL;
+
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x1, y2); ctx.fillStyle = RED; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y1); ctx.fillStyle = GREEN; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x1, y2); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = BLUE; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x2, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = YELLOW; ctx.fill();
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.strokeRect(x1, y1, 3*CELL, 3*CELL);
+    }
+
+    function drawPawns() {
+      let boardOccupancy = {};
+
+      activePlayers.forEach(p => {
+        for(let i=0; i<4; i++) {
+          let step = pawns[p][i];
+          let cell = getPawnCell(p, step);
+
+          if (!cell) {
+            let base = baseCoords[p][i];
+            // Bazadagi toshlarni doira markaziga aniq o'rtalab chizish
+            drawSinglePawn(base.c * CELL, base.r * CELL, p, CELL / 2.3);
+          } else {
+            let key = `${cell.r}_${cell.c}`;
+            if (!boardOccupancy[key]) boardOccupancy[key] = [];
+            boardOccupancy[key].push({ player: p, pawnIndex: i });
+          }
         }
-        if (stepIndex < 51) {
-            const absIdx = (START_INDEX[color] + stepIndex) % 52;
-            const cell = MAIN_PATH[absIdx];
-            return { x: (cell.x + 0.5) * S, y: (cell.y + 0.5) * S };
+      });
+
+      for (let key in boardOccupancy) {
+        let group = boardOccupancy[key];
+        let [r, c] = key.split('_').map(Number);
+
+        if (group.length === 1) {
+          let cx = c * CELL + CELL/2;
+          let cy = r * CELL + CELL/2;
+          drawSinglePawn(cx, cy, group[0].player, CELL / 2.3);
         } else {
-            const remaining = stepIndex - 50;
-            let cell = { x: 7, y: 7 };
-            if (color === 'red') cell = { x: remaining, y: 7 };
-            if (color === 'green') cell = { x: 7, y: remaining };
-            if (color === 'yellow') cell = { x: 14 - remaining, y: 7 };
-            if (color === 'blue') cell = { x: 7, y: 14 - remaining };
-            return { x: (cell.x + 0.5) * S, y: (cell.y + 0.5) * S };
+          let count = group.length;
+          let radius = CELL / (2.2 + count * 0.4); 
+          let offsetDistance = CELL * 0.22;
+
+          group.forEach((item, index) => {
+            let angle = (index * (2 * Math.PI / count)) - (Math.PI / 2);
+            let cx = c * CELL + CELL/2 + Math.cos(angle) * offsetDistance;
+            let cy = r * CELL + CELL/2 + Math.sin(angle) * offsetDistance;
+            drawSinglePawn(cx, cy, item.player, radius);
+          });
         }
+      }
     }
 
-    function drawLocationPinToken(x, y, color, S) {
-        const pinWidth = S * 0.65;
-        const pinHeight = S * 0.85;
+    function drawSinglePawn(cx, cy, p, radius) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fillStyle = COLORS[p];
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      ctx.fill();
 
-        ctx.save();
-        ctx.translate(x, y - pinHeight * 0.35);
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
 
-        ctx.beginPath();
-        ctx.ellipse(0, pinHeight * 0.45, pinWidth * 0.4, pinWidth * 0.2, 0, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-        ctx.fill();
+      let grad = ctx.createRadialGradient(cx - radius/3, cy - radius/3, 1, cx, cy, radius);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.4, COLORS[p]);
+      grad.addColorStop(1, '#000000');
 
-        ctx.beginPath();
-        ctx.moveTo(0, pinHeight * 0.45);
-        ctx.bezierCurveTo(-pinWidth * 0.5, pinHeight * 0.05, -pinWidth * 0.5, -pinHeight * 0.35, 0, -pinHeight * 0.35);
-        ctx.bezierCurveTo(pinWidth * 0.5, -pinHeight * 0.35, pinWidth * 0.5, pinHeight * 0.05, 0, pinHeight * 0.45);
-        ctx.closePath();
-
-        ctx.fillStyle = color;
-        ctx.fill();
-
-        const grad = ctx.createLinearGradient(-pinWidth*0.3, -pinHeight*0.3, pinWidth*0.3, pinHeight*0.3);
-        grad.addColorStop(0, 'rgba(255,255,255,0.4)');
-        grad.addColorStop(0.5, 'rgba(255,255,255,0)');
-        grad.addColorStop(1, 'rgba(0,0,0,0.25)');
-        ctx.fillStyle = grad;
-        ctx.fill();
-
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(0, -pinHeight * 0.08, pinWidth * 0.2, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-
-        ctx.restore();
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 0.65, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
     }
 
-    function drawAllTokens(S) {
-        PLAYERS.forEach(color => {
-            tokens[color].forEach((stepIdx, tokenIdx) => {
-                const pos = getTokenCoords(color, stepIdx, tokenIdx, S);
-                drawLocationPinToken(pos.x, pos.y, COLORS[color], S);
-            });
-        });
+    function handleRoll(pIndex) {
+      if (pIndex !== turn || rolled || isAnimatingMove) return;
+
+      playDiceSound();
+      const t = TRANSLATIONS[currentLang];
+      const btn = document.getElementById(`btn-${turn}`);
+      
+      rolled = true;
+      btn.classList.add('dice-3d-roll');
+
+      let rollCount = 0;
+      let rollInterval = setInterval(() => {
+        btn.innerText = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
+        rollCount++;
+        if (rollCount > 8) {
+          clearInterval(rollInterval);
+          btn.classList.remove('dice-3d-roll');
+
+          dice = Math.floor(Math.random() * 6) + 1;
+          btn.innerText = `🎲 ${dice}`;
+
+          let homePawns = [];
+          let activePawnsList = [];
+
+          for(let i=0; i<4; i++) {
+            let step = pawns[turn][i];
+            if (step === -1) homePawns.push(i);
+            else if (step >= 0 && step + dice <= 56) activePawnsList.push(i);
+          }
+
+          if (dice === 6 && homePawns.length > 0 && activePawnsList.length === 0) {
+            setTimeout(() => executeMoveAnimated(homePawns[0]), 150);
+          }
+          else if (activePawnsList.length === 1 && dice !== 6) {
+            setTimeout(() => executeMoveAnimated(activePawnsList[0]), 150);
+          }
+          else if (activePawnsList.length === 0 && (dice !== 6 || homePawns.length === 0)) {
+            document.getElementById('status-text').innerText = t.noMove.replace('{p}', t.names[turn]);
+            setTimeout(nextTurn, 800);
+          } 
+          else {
+            document.getElementById('status-text').innerText = t.rolled.replace('{p}', t.names[turn]).replace('{d}', dice);
+          }
+        }
+      }, 45);
     }
 
-    function rollDice() {
-        if (!canRoll) return;
-        canRoll = false;
+    function executeMoveAnimated(pawnIndex) {
+      if (isAnimatingMove) return;
+      isAnimatingMove = true;
 
-        const diceEl = document.getElementById('dice');
-        const statusEl = document.getElementById('status-msg');
-        diceEl.classList.add('rolling');
-        statusEl.innerText = "Zar aylanmoqda...";
+      let startStep = pawns[turn][pawnIndex];
 
-        let ticks = 0;
-        const maxTicks = 12;
+      if (startStep === -1 && dice === 6) {
+        pawns[turn][pawnIndex] = 0;
+        playStepSound();
         
-        const tickInterval = setInterval(() => {
-            playTickSound();
-            diceEl.innerText = Math.floor(Math.random() * 6) + 1;
-            ticks++;
-
-            if (ticks >= maxTicks) {
-                clearInterval(tickInterval);
-                diceEl.classList.remove('rolling');
-
-                currentDiceValue = Math.floor(Math.random() * 6) + 1;
-                diceEl.innerText = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][currentDiceValue - 1];
-                document.getElementById('dice-value').innerText = currentDiceValue;
-
-                handleDiceResult();
-            }
-        }, 80);
-    }
-
-    function handleDiceResult() {
-        const color = PLAYERS[currentPlayerIdx];
-        const playerTokens = tokens[color];
-
-        const movableIndices = [];
-        playerTokens.forEach((pos, idx) => {
-            if (pos === -1 && currentDiceValue === 6) movableIndices.push(idx);
-            else if (pos >= 0 && pos + currentDiceValue <= 56) movableIndices.push(idx);
-        });
-
-        const statusEl = document.getElementById('status-msg');
-
-        if (movableIndices.length === 0) {
-            statusEl.innerText = "Yurish imkoni yo'q! Navbat o'tadi.";
-            setTimeout(nextTurn, 1200);
-        } else if (movableIndices.length === 1) {
-            statusEl.innerText = "Avto-yurish bajarilmoqda...";
-            setTimeout(() => moveToken(color, movableIndices[0], currentDiceValue), 600);
-        } else {
-            statusEl.innerText = "Yurmoqchi bo'lgan toshingizni tanlang!";
-            enableTokenSelection(color, movableIndices);
-        }
-    }
-
-    let clickHandler = null;
-
-    function enableTokenSelection(color, movableIndices) {
-        const S = getBoardCellSize();
-
-        clickHandler = function(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-
-            for (let idx of movableIndices) {
-                const pos = getTokenCoords(color, tokens[color][idx], idx, S);
-                if (Math.hypot(clickX - pos.x, clickY - pos.y) < S * 0.7) {
-                    canvas.removeEventListener('click', clickHandler);
-                    moveToken(color, idx, currentDiceValue);
-                    break;
-                }
-            }
-        };
-
-        canvas.addEventListener('click', clickHandler);
-    }
-
-    function moveToken(color, tokenIdx, steps) {
-        playMoveSound();
-        if (tokens[color][tokenIdx] === -1 && steps === 6) tokens[color][tokenIdx] = 0;
-        else tokens[color][tokenIdx] += steps;
-
+        let targetCell = getPawnCell(turn, 0);
+        let hasKilled = checkAndKillPawn(targetCell, turn);
         drawBoard();
 
-        if (steps === 6) {
-            document.getElementById('status-msg').innerText = "6 tushdi! Yana bir marta zar tashlang.";
-            canRoll = true;
-        } else {
-            nextTurn();
-        }
+        if (isSafeCell(targetCell)) playStarSound();
+        finishMove(hasKilled);
+      } else if (startStep >= 0 && startStep + dice <= 56) {
+        let currentStepCount = 0;
+        let moveInterval = setInterval(() => {
+          pawns[turn][pawnIndex]++;
+          currentStepCount++;
+          playStepSound();
+          drawBoard();
+
+          if (currentStepCount >= dice) {
+            clearInterval(moveInterval);
+            
+            let targetCell = getPawnCell(turn, pawns[turn][pawnIndex]);
+            let hasKilled = checkAndKillPawn(targetCell, turn);
+            drawBoard();
+
+            if (isSafeCell(targetCell) || pawns[turn][pawnIndex] >= 51) {
+              playStarSound();
+            }
+
+            finishMove(hasKilled);
+          }
+        }, 80);
+      } else {
+        isAnimatingMove = false;
+      }
     }
+
+    function finishMove(hasKilled) {
+      const t = TRANSLATIONS[currentLang];
+      isAnimatingMove = false;
+
+      if (hasKilled) {
+        rolled = false;
+        document.getElementById('status-text').innerText = t.killed.replace('{p}', t.names[turn]);
+        document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
+      } else if (dice === 6) {
+        rolled = false;
+        document.getElementById('status-text').innerText = t.sixExtra.replace('{p}', t.names[turn]);
+        document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
+      } else {
+        setTimeout(nextTurn, 250);
+      }
+    }
+
+    canvas.addEventListener('click', function(e) {
+      if (!rolled || isAnimatingMove) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      let clickedPawn = -1;
+
+      for(let i=0; i<4; i++) {
+        let step = pawns[turn][i];
+        let cx, cy;
+
+        if (step === -1) {
+          let base = baseCoords[turn][i];
+          cx = base.c * CELL;
+          cy = base.r * CELL;
+        } else {
+          let cell = getPawnCell(turn, step);
+          cx = cell.c * CELL + CELL/2;
+          cy = cell.r * CELL + CELL/2;
+        }
+
+        let dist = Math.hypot(clickX - cx, clickY - cy);
+        if (dist < CELL) {
+          clickedPawn = i;
+          break;
+        }
+      }
+
+      if (clickedPawn !== -1) {
+        let step = pawns[turn][clickedPawn];
+        if ((step === -1 && dice === 6) || (step >= 0 && step + dice <= 56)) {
+          executeMoveAnimated(clickedPawn);
+        }
+      }
+    });
 
     function nextTurn() {
-        currentPlayerIdx = (currentPlayerIdx + 1) % 4;
-        const color = PLAYERS[currentPlayerIdx];
-        
-        const badge = document.getElementById('turn-badge');
-        badge.style.backgroundColor = COLORS[color];
-        badge.style.color = COLORS[color];
-
-        const names = { red: "Qizil", green: "Yashil", yellow: "Sariq", blue: "Ko'k" };
-        document.getElementById('turn-text').innerText = `${names[color]} yurishi`;
-        document.getElementById('status-msg').innerText = "Zar tashlash uchun zarni bosing!";
-        document.getElementById('dice-value').innerText = "-";
-        canRoll = true;
+      const t = TRANSLATIONS[currentLang];
+      document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
+      playerIndex = (playerIndex + 1) % activePlayers.length;
+      turn = activePlayers[playerIndex];
+      rolled = false;
+      activateTurn();
     }
-
-    function resetGame() {
-        PLAYERS.forEach(c => tokens[c] = [-1, -1, -1, -1]);
-        currentPlayerIdx = 0;
-        canRoll = true;
-        document.getElementById('dice-value').innerText = "-";
-        document.getElementById('dice').innerText = "🎲";
-        document.getElementById('turn-badge').style.backgroundColor = COLORS.red;
-        document.getElementById('turn-text').innerText = "Qizil yurishi";
-        document.getElementById('status-msg').innerText = "O'yin qayta boshlandi!";
-        drawBoard();
-    }
-
-    setTimeout(resizeCanvas, 100);
-</script>
+  </script>
 </body>
 </html>
