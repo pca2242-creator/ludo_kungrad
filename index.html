@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Ludo Game Multilingual</title>
+  <title>Qoblannin' Ludo oyini</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
@@ -37,10 +37,11 @@
     }
 
     .overlay-menu h1 {
-      font-size: 26px;
+      font-size: 24px;
       margin-bottom: 5px;
       color: #f1c40f;
       text-shadow: 0 2px 10px rgba(241, 196, 15, 0.4);
+      padding: 0 15px;
     }
 
     .overlay-menu p {
@@ -63,7 +64,6 @@
       transition: 0.2s transform;
     }
     .menu-btn:active { transform: scale(0.95); }
-    .menu-btn.danger { background: linear-gradient(135deg, #e74c3c, #c0392b); }
     .menu-btn.secondary { background: linear-gradient(135deg, #7f8c8d, #34495e); }
 
     /* O'yin interfeysi */
@@ -140,7 +140,6 @@
       touch-action: manipulation; 
     }
 
-    /* Pastki menyu tugmasi va paneli */
     .bottom-bar {
       position: fixed;
       bottom: 12px;
@@ -167,7 +166,7 @@
 
   <!-- 1. Til Tanlash Menyusi -->
   <div id="lang-menu" class="overlay-menu">
-    <h1>🎲 LUDO KUNGRAD</h1>
+    <h1>Qoblannin' Ludo oyinina xosh keldin'</h1>
     <p>Tilni tanlang / Тілді таңдаңыз / Тилди сайлаңъыз:</p>
     <button class="menu-btn" onclick="selectLanguage('uz')">🇺🇿 O'zbekcha</button>
     <button class="menu-btn" onclick="selectLanguage('qq')">🇦🇱 Qaraqalpaqsha</button>
@@ -176,7 +175,7 @@
 
   <!-- 2. Rejim Tanlash Menyusi -->
   <div id="mode-menu" class="overlay-menu" style="display: none;">
-    <h1>🎲 LUDO KUNGRAD</h1>
+    <h1>Qoblannin' Ludo oyinina xosh keldin'</h1>
     <p id="mode-title-text">O'yin rejimini tanlang:</p>
     <button class="menu-btn" id="btn-mode-2" onclick="startGame(2)">👥 2 Players</button>
     <button class="menu-btn" id="btn-mode-3" onclick="startGame(3)">👥 3 Players</button>
@@ -194,8 +193,8 @@
 
   <!-- 4. O'yin Maydoni -->
   <div class="game-container" id="game-ui">
-    <div class="status-bar" id="status-text" style="color: #ff4d4d;">
-      ...
+    <div class="status-bar" id="status-text" style="color: #f1c40f;">
+      Qoblannin' Ludo oyinina xosh keldin'
     </div>
 
     <div class="ludo-wrapper">
@@ -236,6 +235,7 @@
 
     const TRANSLATIONS = {
       uz: {
+        welcome: "Qoblannin' Ludo oyinina xosh keldin'",
         selectMode: "O'yin rejimini tanlang:",
         p2: "👥 2 Kishilik",
         p3: "👥 3 Kishilik",
@@ -255,6 +255,7 @@
         bottomMenu: "⚙️ Menyu"
       },
       qq: {
+        welcome: "Qoblannin' Ludo oyinina xosh keldin'",
         selectMode: "O'yın rejimin saylań:",
         p2: "👥 2 Adamlıq",
         p3: "👥 3 Adamlıq",
@@ -274,6 +275,7 @@
         bottomMenu: "⚙️ Menyu"
       },
       kk: {
+        welcome: "Qoblannin' Ludo oyinina xosh keldin'",
         selectMode: "Ойын режимін таңдаңыз:",
         p2: "👥 2 Ойыншы",
         p3: "👥 3 Ойыншы",
@@ -434,7 +436,16 @@
       playerIndex = 0;
       turn = activePlayers[playerIndex];
       rolled = false;
-      activateTurn();
+
+      // Xush kelibsiz xabarini ko'rsatib keyin navbat beramiz
+      const status = document.getElementById('status-text');
+      status.innerText = "Qoblannin' Ludo oyinina xosh keldin'";
+      status.style.color = "#f1c40f";
+
+      setTimeout(() => {
+        activateTurn();
+      }, 1800);
+
       drawBoard();
     }
 
