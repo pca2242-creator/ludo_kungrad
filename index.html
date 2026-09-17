@@ -7,16 +7,33 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body { font-family: Arial, sans-serif; background: #1c2733; color: #fff; text-align: center; padding: 10px; }
     
-    .status-bar { background: #243142; border-radius: 10px; padding: 10px; margin-bottom: 10px; font-weight: bold; font-size: 15px; }
+    /* Fon rasmi shu yerda o'rnatiladi */
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #1c2733 url('rasm.jpg') no-repeat center center fixed; 
+      background-size: cover; 
+      color: #fff; 
+      text-align: center; 
+      padding: 10px; 
+    }
+    
+    .status-bar { 
+      background: rgba(36, 49, 66, 0.9); 
+      border-radius: 10px; 
+      padding: 10px; 
+      margin-bottom: 10px; 
+      font-weight: bold; 
+      font-size: 16px; 
+      backdrop-filter: blur(5px);
+    }
 
     .ludo-wrapper {
       display: grid;
-      grid-template-columns: 80px 1fr 80px;
-      grid-template-rows: 80px 1fr 80px;
+      grid-template-columns: 85px 1fr 85px;
+      grid-template-rows: 85px 1fr 85px;
       gap: 5px;
-      max-width: 480px;
+      max-width: 540px;
       margin: 0 auto;
       align-items: center;
       justify-items: center;
@@ -25,16 +42,17 @@
     .p-box {
       width: 100%;
       height: 100%;
-      background: #243142;
+      background: rgba(36, 49, 66, 0.85);
       border-radius: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      opacity: 0.4;
+      opacity: 0.5;
       transition: 0.3s;
       border: 2px solid transparent;
       padding: 5px;
+      backdrop-filter: blur(5px);
     }
     .p-box.active {
       opacity: 1;
@@ -42,12 +60,12 @@
       transform: scale(1.05);
     }
 
-    .p-name { font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+    .p-name { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
     .dice-btn {
       border: none;
       color: #fff;
       padding: 8px 10px;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
       border-radius: 6px;
       cursor: pointer;
@@ -65,7 +83,13 @@
       grid-row: 2;
     }
 
-    canvas { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); touch-action: manipulation; }
+    /* O'yin maydoni va shaffofligi */
+    canvas { 
+      background: rgba(255, 255, 255, 0.95); 
+      border-radius: 8px; 
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6); 
+      touch-action: manipulation; 
+    }
   </style>
 </head>
 <body>
@@ -75,31 +99,27 @@
   </div>
 
   <div class="ludo-wrapper">
-    <!-- Qizil Zar (Yuqori Chap) -->
-    <div class="p-box active" id="box-red" style="background: #3b1818;">
+    <div class="p-box active" id="box-red" style="background: rgba(59, 24, 24, 0.85);">
       <div class="p-name" style="color: #ff4d4d;">Qizil</div>
       <button class="dice-btn" id="btn-0" style="background: #ff4d4d;" onclick="handleRoll(0)">🎲 Zar</button>
     </div>
 
-    <!-- Yashil Zar (Yuqori O'ng) -->
-    <div class="p-box" id="box-green" style="background: #183b22;">
+    <div class="p-box" id="box-green" style="background: rgba(24, 59, 34, 0.85);">
       <div class="p-name" style="color: #2ecc71;">Yashil</div>
       <button class="dice-btn" id="btn-1" style="background: #2ecc71;" onclick="handleRoll(1)" disabled>🎲 Zar</button>
     </div>
 
-    <!-- Taxta Maydoni -->
     <div id="board-container">
-      <canvas id="ludoCanvas" width="300" height="300"></canvas>
+      <!-- O'yin maydoni kattalashtirildi (360px) -->
+      <canvas id="ludoCanvas" width="360" height="360"></canvas>
     </div>
 
-    <!-- Ko'k Zar (Pastki Chap) -->
-    <div class="p-box" id="box-blue" style="background: #182c3b;">
+    <div class="p-box" id="box-blue" style="background: rgba(24, 44, 59, 0.85);">
       <div class="p-name" style="color: #3498db;">Ko'k</div>
       <button class="dice-btn" id="btn-3" style="background: #3498db;" onclick="handleRoll(3)" disabled>🎲 Zar</button>
     </div>
 
-    <!-- Sariq Zar (Pastki O'ng) -->
-    <div class="p-box" id="box-yellow" style="background: #3b3718;">
+    <div class="p-box" id="box-yellow" style="background: rgba(59, 55, 24, 0.85);">
       <div class="p-name" style="color: #f1c40f;">Sariq</div>
       <button class="dice-btn" id="btn-2" style="background: #f1c40f; color:#000;" onclick="handleRoll(2)" disabled>🎲 Zar</button>
     </div>
@@ -111,13 +131,13 @@
 
     const canvas = document.getElementById('ludoCanvas');
     const ctx = canvas.getContext('2d');
-    const SIZE = 300;
+    const SIZE = 360; // Maydon kattaligi 360px qilindi
     const CELL = SIZE / 15;
 
     const COLORS = ['#ff4d4d', '#2ecc71', '#f1c40f', '#3498db'];
     const NAMES = ["Qizil", "Yashil", "Sariq", "Ko'k"];
 
-    let turn = 0; // 0: Red, 1: Green, 2: Yellow, 3: Blue
+    let turn = 0;
     let dice = 0;
     let rolled = false;
 
@@ -146,14 +166,8 @@
     const startOffset = [0, 13, 26, 39];
 
     const safeStars = [
-      {r:6, c:1},  
-      {r:2, c:6},  
-      {r:1, c:8},  
-      {r:6, c:12}, 
-      {r:8, c:13}, 
-      {r:12,c:8},  
-      {r:13,c:6},  
-      {r:8, c:2}   
+      {r:6, c:1}, {r:2, c:6}, {r:1, c:8}, {r:6, c:12}, 
+      {r:8, c:13}, {r:12,c:8}, {r:13,c:6}, {r:8, c:2}   
     ];
 
     const baseCoords = [
@@ -174,6 +188,32 @@
       }
       let idx = (startOffset[player] + step) % 52;
       return mainPath[idx];
+    }
+
+    function isSafeCell(cell) {
+      if (!cell) return true;
+      return safeStars.some(s => s.r === cell.r && s.c === cell.c);
+    }
+
+    function checkAndKillPawn(targetCell, currentPlayer) {
+      if (isSafeCell(targetCell)) return false;
+
+      let killed = false;
+      for (let p = 0; p < 4; p++) {
+        if (p === currentPlayer) continue;
+
+        for (let i = 0; i < 4; i++) {
+          let step = pawns[p][i];
+          if (step >= 0 && step < 51) {
+            let c = getPawnCell(p, step);
+            if (c && c.r === targetCell.r && c.c === targetCell.c) {
+              pawns[p][i] = -1;
+              killed = true;
+            }
+          }
+        }
+      }
+      return killed;
     }
 
     function drawBoard() {
@@ -294,20 +334,16 @@
         else if (step >= 0 && step + dice <= 56) activePawns.push(i);
       }
 
-      // 1. Olti tushdi va uydagi toshni chiqarish kerak bo'lsa (maydonda boshqa tosh bo'lmasa)
       if (dice === 6 && homePawns.length > 0 && activePawns.length === 0) {
         setTimeout(() => executeMove(homePawns[0]), 400);
       }
-      // 2. Maydonda faqat 1 ta tosh harakatda bo'lsa va 6 tushmasa
       else if (activePawns.length === 1 && dice !== 6) {
         setTimeout(() => executeMove(activePawns[0]), 400);
       }
-      // 3. Imkoniyat yo'q
       else if (activePawns.length === 0 && (dice !== 6 || homePawns.length === 0)) {
         document.getElementById('status-text').innerText = `${NAMES[turn]}: Imkoniyat yo'q! Navbat o'tdi.`;
         setTimeout(nextTurn, 1200);
       } 
-      // 4. Tanlov bor (uydagi toshni chiqarish yoki maydondagini yurish)
       else {
         document.getElementById('status-text').innerText = `${NAMES[turn]}: Zar (${dice}). Toshni bosing!`;
       }
@@ -315,16 +351,25 @@
 
     function executeMove(pawnIndex) {
       let step = pawns[turn][pawnIndex];
+      let hasKilled = false;
 
       if (step === -1 && dice === 6) {
-        pawns[turn][pawnIndex] = 0; // Uydagilarni navbat bilan chiqarish
+        pawns[turn][pawnIndex] = 0;
+        let targetCell = getPawnCell(turn, 0);
+        hasKilled = checkAndKillPawn(targetCell, turn);
       } else if (step >= 0 && step + dice <= 56) {
         pawns[turn][pawnIndex] += dice;
+        let targetCell = getPawnCell(turn, pawns[turn][pawnIndex]);
+        hasKilled = checkAndKillPawn(targetCell, turn);
       }
 
       drawBoard();
 
-      if (dice === 6) {
+      if (hasKilled) {
+        rolled = false;
+        document.getElementById('status-text').innerText = `💥 ${NAMES[turn]} raqib toshini urib oldi! Yana zar bosing.`;
+        document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
+      } else if (dice === 6) {
         rolled = false;
         document.getElementById('status-text').innerText = `${NAMES[turn]}: 6 tushdi! Yana zar bosing.`;
         document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
@@ -333,7 +378,6 @@
       }
     }
 
-    // Taxtadagi toshlarni chertib yurish
     canvas.addEventListener('click', function(e) {
       if (!rolled) return;
 
