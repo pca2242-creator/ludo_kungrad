@@ -106,7 +106,7 @@
     }
 
     .menu-btn {
-      width: 240px;
+      width: 250px;
       padding: 12px;
       font-size: 16px;
       font-weight: bold;
@@ -117,6 +117,10 @@
       cursor: pointer;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
       transition: 0.2s transform;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
     .menu-btn:active { transform: scale(0.95); }
     .menu-btn.secondary { background: linear-gradient(135deg, #7f8c8d, #34495e); }
@@ -172,7 +176,7 @@
       border: none;
       color: #fff;
       padding: 8px;
-      font-size: 15px;
+      font-size: 20px;
       font-weight: bold;
       border-radius: 10px;
       cursor: pointer;
@@ -244,8 +248,8 @@
     <h1>Qoblannin' Ludo oyina xosh keldin'</h1>
     <p>Tilni tanlang / Тілді таңдаңыз / Тилди сайлаңъыз:</p>
     <button class="menu-btn" onclick="selectLanguage('uz')">🇺🇿 O'zbekcha</button>
-    <button class="menu-btn" onclick="selectLanguage('qq')">🇦🇱 Qaraqalpaqsha</button>
-    <button class="menu-btn" onclick="selectLanguage('kk')">🇰ℤ Qazaqsha</button>
+    <button class="menu-btn" onclick="selectLanguage('qq')">🚩 Qaraqalpaqsha</button>
+    <button class="menu-btn" onclick="selectLanguage('kk')">🇰🇿 Qazaqsha</button>
   </div>
 
   <div id="mode-menu" class="overlay-menu" style="display: none;">
@@ -272,12 +276,12 @@
     <div class="ludo-wrapper">
       <div class="p-box" id="box-red">
         <div class="p-name" id="name-0" style="color: #ff3333;">Qizil</div>
-        <button class="dice-btn" id="btn-0" style="background: linear-gradient(135deg, #ff4d4d, #c0392b);" onclick="handleRoll(0)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-0" style="background: linear-gradient(135deg, #ff4d4d, #c0392b);" onclick="handleRoll(0)">🎲</button>
       </div>
 
       <div class="p-box" id="box-green">
         <div class="p-name" id="name-1" style="color: #2ecc71;">Yashil</div>
-        <button class="dice-btn" id="btn-1" style="background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleRoll(1)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-1" style="background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleRoll(1)">🎲</button>
       </div>
 
       <div id="board-container">
@@ -286,12 +290,12 @@
 
       <div class="p-box" id="box-blue">
         <div class="p-name" id="name-3" style="color: #3498db;">Ko'k</div>
-        <button class="dice-btn" id="btn-3" style="background: linear-gradient(135deg, #3498db, #2980b9);" onclick="handleRoll(3)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-3" style="background: linear-gradient(135deg, #3498db, #2980b9);" onclick="handleRoll(3)">🎲</button>
       </div>
 
       <div class="p-box" id="box-yellow">
         <div class="p-name" id="name-2" style="color: #f1c40f;">Sariq</div>
-        <button class="dice-btn" id="btn-2" style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000;" onclick="handleRoll(2)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-2" style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000;" onclick="handleRoll(2)">🎲</button>
       </div>
     </div>
 
@@ -486,7 +490,6 @@
         p3: "👥 3 Kishilik",
         p4: "👥 4 Kishilik",
         names: ["Qizil", "Yashil", "Sariq", "Ko'k"],
-        diceBtn: "🎲 Zar",
         turn: "Navbat: {p} - Zarni bosing!",
         rolled: "{p}: Zar ({d}). Toshni bosing!",
         noMove: "{p}: Imkoniyat yo'q! Navbat o'tdi.",
@@ -506,7 +509,6 @@
         p3: "👥 3 Adamlıq",
         p4: "👥 4 Adamlıq",
         names: ["Qızıl", "Jasıl", "Sarı", "Kók"],
-        diceBtn: "🎲 Zar",
         turn: "Gezek: {p} - Zardı basıń!",
         rolled: "{p}: Zar ({d}). Tassha basıń!",
         noMove: "{p}: Imkoniyat joq! Gezek ótti.",
@@ -526,7 +528,6 @@
         p3: "👥 3 Ойыншы",
         p4: "👥 4 Ойыншы",
         names: ["Қызыл", "Жасыл", "Сары", "Көк"],
-        diceBtn: "🎲 Сүйек",
         turn: "Кезек: {p} - Сүйекті басыңыз!",
         rolled: "{p}: Сүйек ({d}). Тасты басыңыз!",
         noMove: "{p}: Мүмкіндік жоқ! Кезек өтті.",
@@ -560,7 +561,7 @@
 
       for(let i=0; i<4; i++) {
         document.getElementById(`name-${i}`).innerText = t.names[i];
-        document.getElementById(`btn-${i}`).innerText = t.diceBtn;
+        document.getElementById(`btn-${i}`).innerText = "🎲";
       }
     }
 
@@ -626,7 +627,6 @@
     const SIZE = 360;
     const CELL = SIZE / 15;
 
-    // YANADA TINIQ HD COLOR PALETTE
     const RED = '#ff2a2a';
     const GREEN = '#10b981';
     const YELLOW = '#fbbf24';
@@ -772,27 +772,22 @@
       return killed;
     }
 
-    // 🎨 YANADA TINIQ VA KUCHLI HD O'YIN TAQTASI RENDERI
     function drawBoard() {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
-      // Fon
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, SIZE, SIZE);
 
-      // Asosiy burchak zonalari
       drawSquare(0, 0, 6, RED);
       drawSquare(0, 9, 6, GREEN);
       drawSquare(9, 0, 6, BLUE);
       drawSquare(9, 9, 6, YELLOW);
 
-      // Ichki oq uychalar
       drawSquare(1, 1, 4, '#ffffff');
       drawSquare(1, 10, 4, '#ffffff');
       drawSquare(10, 1, 4, '#ffffff');
       drawSquare(10, 10, 4, '#ffffff');
 
-      // Baza joylari (Toshlar turadigan doiralar)
       baseCoords.forEach((playerBases, pIdx) => {
         playerBases.forEach(b => {
           ctx.beginPath();
@@ -805,7 +800,6 @@
         });
       });
 
-      // Kataklar va chegaralar (Grid lines)
       for(let r=0; r<15; r++) {
         for(let c=0; c<15; c++) {
           if ((r<6 && c<6) || (r<6 && c>8) || (r>8 && c<6) || (r>8 && c>8)) continue;
@@ -815,7 +809,6 @@
         }
       }
 
-      // Rangli marralar
       for(let i=1; i<=5; i++) {
         fillCell(7, i, RED);
         fillCell(i, 7, GREEN);
@@ -823,7 +816,6 @@
         fillCell(7, 14-i, YELLOW);
       }
 
-      // Boshlang'ich rangli kataklar
       fillCell(6, 1, RED);
       fillCell(1, 8, GREEN);
       fillCell(13, 6, BLUE);
@@ -878,7 +870,6 @@
       ctx.strokeRect(x1, y1, 3*CELL, 3*CELL);
     }
 
-    // ♟️ TINIQ HD TOSHLAR RENDERI
     function drawPawns() {
       activePlayers.forEach(p => {
         for(let i=0; i<4; i++) {
@@ -930,14 +921,13 @@
 
       let rollCount = 0;
       let rollInterval = setInterval(() => {
-        btn.innerText = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
         rollCount++;
         if (rollCount > 8) {
           clearInterval(rollInterval);
           btn.classList.remove('dice-3d-roll');
 
           dice = Math.floor(Math.random() * 6) + 1;
-          btn.innerText = `🎲 ${dice}`;
+          btn.innerText = `🎲`;
 
           let homePawns = [];
           let activePawnsList = [];
@@ -965,7 +955,6 @@
       }, 45);
     }
 
-    // ⚡ TEZKOR VA SILLIQ TOSH SAKRASH ANIMATSIYASI (80ms)
     function executeMoveAnimated(pawnIndex) {
       if (isAnimatingMove) return;
       isAnimatingMove = true;
@@ -1003,7 +992,7 @@
 
             finishMove(hasKilled);
           }
-        }, 80); // Tezlashtirilgan sakrash vaqti
+        }, 80);
       } else {
         isAnimatingMove = false;
       }
@@ -1016,11 +1005,11 @@
       if (hasKilled) {
         rolled = false;
         document.getElementById('status-text').innerText = t.killed.replace('{p}', t.names[turn]);
-        document.getElementById(`btn-${turn}`).innerText = t.diceBtn;
+        document.getElementById(`btn-${turn}`).innerText = "🎲";
       } else if (dice === 6) {
         rolled = false;
         document.getElementById('status-text').innerText = t.sixExtra.replace('{p}', t.names[turn]);
-        document.getElementById(`btn-${turn}`).innerText = t.diceBtn;
+        document.getElementById(`btn-${turn}`).innerText = "🎲";
       } else {
         setTimeout(nextTurn, 250);
       }
@@ -1060,7 +1049,7 @@
 
     function nextTurn() {
       const t = TRANSLATIONS[currentLang];
-      document.getElementById(`btn-${turn}`).innerText = t.diceBtn;
+      document.getElementById(`btn-${turn}`).innerText = "🎲";
       playerIndex = (playerIndex + 1) % activePlayers.length;
       turn = activePlayers[playerIndex];
       rolled = false;
