@@ -22,6 +22,60 @@
       justify-content: center;
     }
 
+    /* Musiqa o'chirish/yoqish tugmasi */
+    .music-toggle {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 200;
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f1c40f;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Start Animatsiyasi Overlaya */
+    #start-animation-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .anim-title {
+      font-size: 32px;
+      color: #f1c40f;
+      text-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
+      animation: pulse 0.8s infinite alternate;
+    }
+
+    .anim-countdown {
+      font-size: 80px;
+      font-weight: bold;
+      color: #3498db;
+      margin-top: 10px;
+      animation: zoom 0.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+
+    @keyframes zoom {
+      from { transform: scale(0.8); opacity: 0.7; }
+      to { transform: scale(1.2); opacity: 1; }
+    }
+
     /* Modal menyular */
     .overlay-menu {
       position: fixed;
@@ -164,9 +218,17 @@
 </head>
 <body>
 
+  <button class="music-toggle" id="music-btn" onclick="toggleMusic()">🎵 Musiqa: ON</button>
+
+  <!-- Start Animatsiyasi -->
+  <div id="start-animation-overlay">
+    <div class="anim-title">GAME START!</div>
+    <div class="anim-countdown" id="anim-count">3</div>
+  </div>
+
   <!-- 1. Til Tanlash Menyusi -->
   <div id="lang-menu" class="overlay-menu">
-    <h1>Qoblannin' Ludo oyinina xosh keldin'</h1>
+    <h1>Qoblannin' Ludo oyina xosh keldin'</h1>
     <p>Tilni tanlang / Тілді таңдаңыз / Тилди сайлаңъыз:</p>
     <button class="menu-btn" onclick="selectLanguage('uz')">🇺🇿 O'zbekcha</button>
     <button class="menu-btn" onclick="selectLanguage('qq')">🇦🇱 Qaraqalpaqsha</button>
@@ -175,11 +237,11 @@
 
   <!-- 2. Rejim Tanlash Menyusi -->
   <div id="mode-menu" class="overlay-menu" style="display: none;">
-    <h1>Qoblannin' Ludo oyinina xosh keldin'</h1>
+    <h1>Qoblannin' Ludo oyina xosh keldin'</h1>
     <p id="mode-title-text">O'yin rejimini tanlang:</p>
-    <button class="menu-btn" id="btn-mode-2" onclick="startGame(2)">👥 2 Players</button>
-    <button class="menu-btn" id="btn-mode-3" onclick="startGame(3)">👥 3 Players</button>
-    <button class="menu-btn" id="btn-mode-4" onclick="startGame(4)">👥 4 Players</button>
+    <button class="menu-btn" id="btn-mode-2" onclick="startGameWithAnimation(2)">👥 2 Players</button>
+    <button class="menu-btn" id="btn-mode-3" onclick="startGameWithAnimation(3)">👥 3 Players</button>
+    <button class="menu-btn" id="btn-mode-4" onclick="startGameWithAnimation(4)">👥 4 Players</button>
   </div>
 
   <!-- 3. In-Game Sozlamalar Menyusi -->
@@ -194,7 +256,7 @@
   <!-- 4. O'yin Maydoni -->
   <div class="game-container" id="game-ui">
     <div class="status-bar" id="status-text" style="color: #f1c40f;">
-      Qoblannin' Ludo oyinina xosh keldin'
+      Qoblannin' Ludo oyina xosh keldin'
     </div>
 
     <div class="ludo-wrapper">
@@ -223,7 +285,6 @@
       </div>
     </div>
 
-    <!-- Pastki Ixcham Menyu Tugmasi -->
     <div class="bottom-bar">
       <button class="bottom-menu-btn" id="btn-open-settings" onclick="openSettings()">⚙️ Menyu</button>
     </div>
@@ -233,17 +294,95 @@
     const tg = window.Telegram.WebApp;
     if (tg) tg.expand();
 
-    // Web Audio API sintezatsiyasi (Tosh va Zar ovozlari uchun)
+    // Web Audio API Audio Engine
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
+    let bgMusicInterval = null;
+    let musicOn = true;
 
     function initAudio() {
       if (!audioCtx) {
         audioCtx = new AudioContext();
       }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
     }
 
-    // Zar tashlash ovozi
+    function toggleMusic() {
+      musicOn = !musicOn;
+      const btn = document.getElementById('music-btn');
+      if (musicOn) {
+        btn.innerText = "🎵 Musiqa: ON";
+        startBgMusic();
+      } else {
+        btn.innerText = "🔇 Musiqa: OFF";
+        stopBgMusic();
+      }
+    }
+
+    // Dynamic Orqa fon Ludo melodiyasi
+    function startBgMusic() {
+      if (!musicOn || bgMusicInterval) return;
+      initAudio();
+
+      const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
+      let step = 0;
+
+      bgMusicInterval = setInterval(() => {
+        if (!musicOn || !audioCtx) return;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+        step++;
+      }, 400);
+    }
+
+    function stopBgMusic() {
+      if (bgMusicInterval) {
+        clearInterval(bgMusicInterval);
+        bgMusicInterval = null;
+      }
+    }
+
+    // Intro Animatsiya va qo'shiq/ovoz effekti
+    function playStartIntroSound() {
+      initAudio();
+      if (!audioCtx) return;
+
+      const introNotes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+      introNotes.forEach((freq, idx) => {
+        setTimeout(() => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.2);
+        }, idx * 120);
+      });
+    }
+
+    // Zar ovozi
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
@@ -267,7 +406,7 @@
       }
     }
 
-    // Tosh surish (yurish) ovozi
+    // Tosh surish ovozi
     function playMoveSound() {
       initAudio();
       if (!audioCtx) return;
@@ -291,7 +430,7 @@
 
     const TRANSLATIONS = {
       uz: {
-        welcome: "Qoblannin' Ludo oyinina xosh keldin'",
+        welcome: "Qoblannin' Ludo oyina xosh keldin'",
         selectMode: "O'yin rejimini tanlang:",
         p2: "👥 2 Kishilik",
         p3: "👥 3 Kishilik",
@@ -311,7 +450,7 @@
         bottomMenu: "⚙️ Menyu"
       },
       qq: {
-        welcome: "Qoblannin' Ludo oyinina xosh keldin'",
+        welcome: "Qoblannin' Ludo oyina xosh keldin'",
         selectMode: "O'yın rejimin saylań:",
         p2: "👥 2 Adamlıq",
         p3: "👥 3 Adamlıq",
@@ -331,7 +470,7 @@
         bottomMenu: "⚙️ Menyu"
       },
       kk: {
-        welcome: "Qoblannin' Ludo oyinina xosh keldin'",
+        welcome: "Qoblannin' Ludo oyina xosh keldin'",
         selectMode: "Ойын режимін таңдаңыз:",
         p2: "👥 2 Ойыншы",
         p3: "👥 3 Ойыншы",
@@ -381,6 +520,30 @@
       updateLanguageUI();
       document.getElementById('lang-menu').style.display = 'none';
       document.getElementById('mode-menu').style.display = 'flex';
+      startBgMusic();
+    }
+
+    function startGameWithAnimation(mode) {
+      document.getElementById('mode-menu').style.display = 'none';
+      const animOverlay = document.getElementById('start-animation-overlay');
+      const countEl = document.getElementById('anim-count');
+      animOverlay.style.display = 'flex';
+
+      playStartIntroSound();
+
+      let count = 3;
+      countEl.innerText = count;
+
+      let interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countEl.innerText = count;
+        } else {
+          clearInterval(interval);
+          animOverlay.style.display = 'none';
+          startGame(mode);
+        }
+      }, 600);
     }
 
     function openSettings() {
@@ -405,7 +568,7 @@
 
     function restartGame() {
       closeSettings();
-      startGame(currentMode);
+      startGameWithAnimation(currentMode);
     }
 
     const canvas = document.getElementById('ludoCanvas');
@@ -478,7 +641,6 @@
       else if (mode === 3) activePlayers = [0, 1, 2];
       else activePlayers = [0, 1, 2, 3];
 
-      document.getElementById('mode-menu').style.display = 'none';
       document.getElementById('game-ui').style.display = 'block';
 
       for(let i=0; i<4; i++) {
@@ -496,12 +658,12 @@
       rolled = false;
 
       const status = document.getElementById('status-text');
-      status.innerText = "Qoblannin' Ludo oyinina xosh keldin'";
+      status.innerText = "Qoblannin' Ludo oyina xosh keldin'";
       status.style.color = "#f1c40f";
 
       setTimeout(() => {
         activateTurn();
-      }, 1800);
+      }, 500);
 
       drawBoard();
     }
@@ -685,7 +847,7 @@
     function handleRoll(pIndex) {
       if (pIndex !== turn || rolled) return;
 
-      playDiceSound(); // Zar ovozi chalinadi
+      playDiceSound();
       const t = TRANSLATIONS[currentLang];
       dice = Math.floor(Math.random() * 6) + 1;
       rolled = true;
@@ -718,7 +880,7 @@
     }
 
     function executeMove(pawnIndex) {
-      playMoveSound(); // Tosh yurish ovozi chalinadi
+      playMoveSound();
       const t = TRANSLATIONS[currentLang];
       let step = pawns[turn][pawnIndex];
       let hasKilled = false;
