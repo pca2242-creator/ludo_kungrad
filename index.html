@@ -379,7 +379,6 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    // Har bir ishtirokchi uchun xos ovoz balandligidagi "Voy dod!"
     function playVoyDodSound(player) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -455,37 +454,50 @@
       });
     }
 
-    // "ttttrrrrrrttttrrrrrr" - Zar otish ovozi
+    // "ttttrrrrrrttttrrrrrr" - Zar aylanib tushish ovozi
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
       let now = audioCtx.currentTime;
-      let totalSteps = 18;
-      
-      for (let i = 0; i < totalSteps; i++) {
+      let sequence = [
+        { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 },
+        { type: 'r', dur: 0.08 },
+        { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 }, { type: 't', dur: 0.02 },
+        { type: 'r', dur: 0.10 }
+      ];
+
+      let currentTimeOffset = 0;
+      sequence.forEach((item) => {
         let osc = audioCtx.createOscillator();
         let gain = audioCtx.createGain();
         let filter = audioCtx.createBiquadFilter();
 
-        let isT = i % 4 < 2;
-        osc.type = isT ? 'square' : 'sawtooth';
-        
-        let freq = isT ? (600 + Math.random() * 200) : (250 + Math.random() * 150);
-        osc.frequency.setValueAtTime(freq, now + i * 0.025);
-
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(isT ? 1200 : 800, now + i * 0.025);
-
-        gain.gain.setValueAtTime(0.18, now + i * 0.025);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.025 + 0.02);
+        if (item.type === 't') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(750 + Math.random() * 150, now + currentTimeOffset);
+          filter.type = 'highpass';
+          filter.frequency.setValueAtTime(1500, now + currentTimeOffset);
+          gain.gain.setValueAtTime(0.25, now + currentTimeOffset);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + currentTimeOffset + item.dur);
+        } else {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now + currentTimeOffset);
+          osc.frequency.exponentialRampToValueAtTime(120, now + currentTimeOffset + item.dur);
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(800, now + currentTimeOffset);
+          gain.gain.setValueAtTime(0.2, now + currentTimeOffset);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + currentTimeOffset + item.dur);
+        }
 
         osc.connect(filter);
         filter.connect(gain);
         gain.connect(audioCtx.destination);
 
-        osc.start(now + i * 0.025);
-        osc.stop(now + i * 0.025 + 0.02);
-      }
+        osc.start(now + currentTimeOffset);
+        osc.stop(now + currentTimeOffset + item.dur);
+
+        currentTimeOffset += item.dur + 0.015;
+      });
     }
 
     function playStepSound() {
@@ -575,6 +587,7 @@
         rolled: "{p}: Zar ({d}). Toshni bosing!",
         noMove: "{p}: Imkoniyat yo'q! Navbat o'tdi.",
         killed: "💥 {p} raqib toshini urdi! Yana zar bosing.",
+        homeBonus: "🎯 {p} toshi marraga kirdi! Yana zar bosing.",
         sixExtra: "{p}: 6 tushdi! Yana zar bosing.",
         settingsTitle: "⚙️ SOZLAMALAR",
         restart: "🔄 Qayta Boshlash",
@@ -601,6 +614,7 @@
         rolled: "{p}: Zar ({d}). Tassha basıń!",
         noMove: "{p}: Imkoniyat joq! Gezek ótti.",
         killed: "💥 {p} dushpan tasın urdı! Jáne zar basıń.",
+        homeBonus: "🎯 {p} tası márege kirdi! Jáne zar basıń.",
         sixExtra: "{p}: 6 tústı! Jáne zar basıń.",
         settingsTitle: "⚙️ SAZLAUAR",
         restart: "🔄 Qaytadan Baslau",
@@ -627,6 +641,7 @@
         rolled: "{p}: Сүйек ({d}). Тасты басыңыз!",
         noMove: "{p}: Мүмкіндік жоқ! Кезек өтті.",
         killed: "💥 {p} қарсыластың тасын ұрды! Тағы сүйек басыңыз.",
+        homeBonus: "🎯 {p} тасы мәреге кірді! Тағы сүйек басыңыз.",
         sixExtra: "{p}: 6 түсті! Тағы сүйек басыңыз.",
         settingsTitle: "⚙️ БАПТАУЛАР",
         restart: "Кайта Бастау",
@@ -866,7 +881,6 @@
       return safeStars.some(s => s.r === cell.r && s.c === cell.c);
     }
 
-    // Urilgan toshni KATAKMA-KATAK orqaga qaytarish va "Voy dod!" dedirtirish
     function checkAndKillPawn(targetCell, currentPlayer) {
       if (!targetCell || isSafeCell(targetCell)) return false;
 
@@ -881,19 +895,18 @@
             if (c && c.r === targetCell.r && c.c === targetCell.c) {
               killed = true;
               isAnimatingMove = true;
-              playKillSound(p); // Urilgan tosh egasi ovozida Voy Dod
+              playKillSound(p);
 
-              // Katak bo'ylab ortga qaytarish interaktiv harakati
               let returnInterval = setInterval(() => {
                 pawns[p][i]--;
                 playStepSound();
 
                 if (pawns[p][i] < 0) {
                   clearInterval(returnInterval);
-                  pawns[p][i] = -1; // O'z uyiga yetdi
+                  pawns[p][i] = -1;
                   isAnimatingMove = false;
                 }
-              }, 40); // Tezkor tarzda ortga yurish
+              }, 40);
             }
           }
         }
@@ -1160,7 +1173,7 @@
         let hasKilled = checkAndKillPawn(targetCell, turn);
 
         if (isSafeCell(targetCell)) playStarSound();
-        finishMove(hasKilled);
+        finishMove(hasKilled, pawnIndex);
       } else if (startStep >= 0 && startStep + dice <= 56) {
         let currentStepCount = 0;
         let moveInterval = setInterval(() => {
@@ -1178,7 +1191,7 @@
               playStarSound();
             }
 
-            finishMove(hasKilled);
+            finishMove(hasKilled, pawnIndex);
           }
         }, 80);
       } else {
@@ -1186,16 +1199,16 @@
       }
     }
 
-    function finishMove(hasKilled) {
+    function finishMove(hasKilled, movedPawnIndex) {
       const t = TRANSLATIONS[currentLang];
       const nameList = (currentMode === 1) ? t.namesVsBot : t.namesHuman;
       
-      // Agar urilgan tosh ortga animatsiya orqali qaytayotgan bo'lsa sal kutamiz
       let waitTime = hasKilled ? 600 : 100;
 
       setTimeout(() => {
         isAnimatingMove = false;
 
+        let reachedHome = (pawns[turn][movedPawnIndex] === 56);
         let isPlayerFinished = pawns[turn].every(step => step === 56);
 
         if (isPlayerFinished && !winnersRank.includes(turn)) {
@@ -1214,6 +1227,14 @@
         if (hasKilled) {
           rolled = false;
           document.getElementById('status-text').innerText = t.killed.replace('{p}', nameList[turn]);
+          document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
+          if (currentMode === 1 && turn === 2) {
+            setTimeout(() => { handleRoll(2); }, 700);
+          }
+        } else if (reachedHome) {
+          // Marraga to'liq kirgani uchun qo'shimcha zar imkoniyati
+          rolled = false;
+          document.getElementById('status-text').innerText = t.homeBonus.replace('{p}', nameList[turn]);
           document.getElementById(`btn-${turn}`).innerText = "🎲 Zar";
           if (currentMode === 1 && turn === 2) {
             setTimeout(() => { handleRoll(2); }, 700);
