@@ -315,12 +315,8 @@
     let isAnimatingMove = false;
 
     function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new AudioContext();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (!audioCtx) audioCtx = new AudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
     function toggleMusic() {
@@ -338,24 +334,18 @@
     function startBgMusic() {
       if (!musicOn || bgMusicInterval) return;
       initAudio();
-
       const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
       let step = 0;
-
       bgMusicInterval = setInterval(() => {
         if (!musicOn || !audioCtx) return;
         let osc = audioCtx.createOscillator();
         let gain = audioCtx.createGain();
-
         osc.type = 'sine';
         osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
-
         gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
         osc.start();
         osc.stop(audioCtx.currentTime + 0.3);
         step++;
@@ -372,22 +362,17 @@
     function playStartIntroSound() {
       initAudio();
       if (!audioCtx) return;
-
       const introNotes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
       introNotes.forEach((freq, idx) => {
         setTimeout(() => {
           let osc = audioCtx.createOscillator();
           let gain = audioCtx.createGain();
-
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
           gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-
           osc.connect(gain);
           gain.connect(audioCtx.destination);
-
           osc.start();
           osc.stop(audioCtx.currentTime + 0.2);
         }, idx * 120);
@@ -397,85 +382,67 @@
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
-
       let now = audioCtx.currentTime;
       for (let i = 0; i < 8; i++) {
         let osc = audioCtx.createOscillator();
         let gain = audioCtx.createGain();
-
         osc.type = i % 2 === 0 ? 'square' : 'sawtooth';
         osc.frequency.setValueAtTime(320 + Math.random() * 380, now + i * 0.03);
-
         gain.gain.setValueAtTime(0.15, now + i * 0.03);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.03 + 0.025);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
         osc.start(now + i * 0.03);
         osc.stop(now + i * 0.03 + 0.025);
       }
-
-      setTimeout(() => {
-        if (!audioCtx) return;
-        let impactOsc = audioCtx.createOscillator();
-        let impactGain = audioCtx.createGain();
-
-        impactOsc.type = 'triangle';
-        impactOsc.frequency.setValueAtTime(200, audioCtx.currentTime);
-        impactOsc.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime + 0.06);
-
-        impactGain.gain.setValueAtTime(0.65, audioCtx.currentTime);
-        impactGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
-
-        impactOsc.connect(impactGain);
-        impactGain.connect(audioCtx.destination);
-
-        impactOsc.start();
-        impactOsc.stop(audioCtx.currentTime + 0.06);
-      }, 350);
     }
 
     function playStepSound() {
       initAudio();
       if (!audioCtx) return;
-
       let osc = audioCtx.createOscillator();
       let gain = audioCtx.createGain();
-
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(900, audioCtx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.035);
-
       gain.gain.setValueAtTime(0.55, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
-
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-
       osc.start();
       osc.stop(audioCtx.currentTime + 0.035);
+    }
+
+    function playKillSound() {
+      initAudio();
+      if (!audioCtx) return;
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
     }
 
     function playStarSound() {
       initAudio();
       if (!audioCtx) return;
-
       const starNotes = [523.25, 659.25, 783.99, 1046.50];
       starNotes.forEach((freq, idx) => {
         setTimeout(() => {
           let osc = audioCtx.createOscillator();
           let gain = audioCtx.createGain();
-
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
           gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
-
           osc.connect(gain);
           gain.connect(audioCtx.destination);
-
           osc.start();
           osc.stop(audioCtx.currentTime + 0.12);
         }, idx * 60);
@@ -597,26 +564,18 @@
       }, 500);
     }
 
-    function openSettings() {
-      document.getElementById('settings-menu').style.display = 'flex';
-    }
-
-    function closeSettings() {
-      document.getElementById('settings-menu').style.display = 'none';
-    }
-
+    function openSettings() { document.getElementById('settings-menu').style.display = 'flex'; }
+    function closeSettings() { document.getElementById('settings-menu').style.display = 'none'; }
     function openLangMenu() {
       closeSettings();
       document.getElementById('game-ui').style.display = 'none';
       document.getElementById('lang-menu').style.display = 'flex';
     }
-
     function openModeMenu() {
       closeSettings();
       document.getElementById('game-ui').style.display = 'none';
       document.getElementById('mode-menu').style.display = 'flex';
     }
-
     function restartGame() {
       closeSettings();
       startGameWithAnimation(currentMode);
@@ -712,10 +671,7 @@
       status.innerText = "Qoblannin' Ludo oyina xosh keldin'";
       status.style.color = "#f1c40f";
 
-      setTimeout(() => {
-        activateTurn();
-      }, 400);
-
+      setTimeout(() => { activateTurn(); }, 400);
       drawBoard();
     }
 
@@ -752,8 +708,9 @@
       return safeStars.some(s => s.r === cell.r && s.c === cell.c);
     }
 
+    // DARROV YEB QO'YISH MEXANIZMI
     function checkAndKillPawn(targetCell, currentPlayer) {
-      if (isSafeCell(targetCell)) return false;
+      if (!targetCell || isSafeCell(targetCell)) return false;
 
       let killed = false;
       activePlayers.forEach(p => {
@@ -763,12 +720,14 @@
           if (step >= 0 && step < 51) {
             let c = getPawnCell(p, step);
             if (c && c.r === targetCell.r && c.c === targetCell.c) {
-              pawns[p][i] = -1;
+              pawns[p][i] = -1; // Tosh darrov o'z bazasiga qaytadi
               killed = true;
             }
           }
         }
       });
+
+      if (killed) playKillSound();
       return killed;
     }
 
@@ -870,43 +829,74 @@
       ctx.strokeRect(x1, y1, 3*CELL, 3*CELL);
     }
 
+    // YULDUZLI KATAKLARDA TOSH-TOSHLARNI QATOR / YONMA-YON KO'RSATISH
     function drawPawns() {
+      let boardOccupancy = {};
+
       activePlayers.forEach(p => {
         for(let i=0; i<4; i++) {
           let step = pawns[p][i];
           let cell = getPawnCell(p, step);
-          if (!cell) cell = baseCoords[p][i];
 
-          let cx = cell.c * CELL + CELL/2;
-          let cy = cell.r * CELL + CELL/2;
-          let radius = CELL / 2.4;
-
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-          ctx.fillStyle = COLORS[p];
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-          ctx.shadowBlur = 8;
-          ctx.shadowOffsetX = 3;
-          ctx.shadowOffsetY = 3;
-          ctx.fill();
-
-          ctx.shadowColor = 'transparent';
-
-          ctx.lineWidth = 3;
-          ctx.strokeStyle = '#ffffff';
-          ctx.stroke();
-
-          let grad = ctx.createRadialGradient(cx - radius/3, cy - radius/3, 1, cx, cy, radius);
-          grad.addColorStop(0, '#ffffff');
-          grad.addColorStop(0.4, COLORS[p]);
-          grad.addColorStop(1, '#000000');
-
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius * 0.7, 0, Math.PI * 2);
-          ctx.fillStyle = grad;
-          ctx.fill();
+          if (!cell) {
+            let base = baseCoords[p][i];
+            drawSinglePawn(base.c * CELL + CELL/2, base.r * CELL + CELL/2, p, CELL / 2.4);
+          } else {
+            let key = `${cell.r}_${cell.c}`;
+            if (!boardOccupancy[key]) boardOccupancy[key] = [];
+            boardOccupancy[key].push({ player: p, pawnIndex: i });
+          }
         }
       });
+
+      for (let key in boardOccupancy) {
+        let group = boardOccupancy[key];
+        let [r, c] = key.split('_').map(Number);
+
+        if (group.length === 1) {
+          let cx = c * CELL + CELL/2;
+          let cy = r * CELL + CELL/2;
+          drawSinglePawn(cx, cy, group[0].player, CELL / 2.4);
+        } else {
+          // Bitta katakda (yulduzchada) 2 yoki undan ko'p tosh bo'lsa ularni yonma-yon qilib joylash
+          let count = group.length;
+          let radius = CELL / (2.2 + count * 0.4); 
+          let offsetDistance = CELL * 0.22;
+
+          group.forEach((item, index) => {
+            let angle = (index * (2 * Math.PI / count)) - (Math.PI / 2);
+            let cx = c * CELL + CELL/2 + Math.cos(angle) * offsetDistance;
+            let cy = r * CELL + CELL/2 + Math.sin(angle) * offsetDistance;
+            drawSinglePawn(cx, cy, item.player, radius);
+          });
+        }
+      }
+    }
+
+    function drawSinglePawn(cx, cy, p, radius) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fillStyle = COLORS[p];
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      ctx.fill();
+
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      let grad = ctx.createRadialGradient(cx - radius/3, cy - radius/3, 1, cx, cy, radius);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.4, COLORS[p]);
+      grad.addColorStop(1, '#000000');
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 0.65, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
     }
 
     function handleRoll(pIndex) {
@@ -921,7 +911,6 @@
 
       let rollCount = 0;
       let rollInterval = setInterval(() => {
-        // Aylanish jarayonida tasodifiy sonlarni tez ko'rsatib turish
         btn.innerText = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
         rollCount++;
         if (rollCount > 8) {
@@ -929,7 +918,6 @@
           btn.classList.remove('dice-3d-roll');
 
           dice = Math.floor(Math.random() * 6) + 1;
-          // ZAR USTIDA TUSHGAN SONNI ANIQ QILIB CHIQARISH
           btn.innerText = `🎲 ${dice}`;
 
           let homePawns = [];
@@ -962,18 +950,17 @@
       if (isAnimatingMove) return;
       isAnimatingMove = true;
 
-      const t = TRANSLATIONS[currentLang];
       let startStep = pawns[turn][pawnIndex];
 
       if (startStep === -1 && dice === 6) {
         pawns[turn][pawnIndex] = 0;
         playStepSound();
-        drawBoard();
         
         let targetCell = getPawnCell(turn, 0);
         let hasKilled = checkAndKillPawn(targetCell, turn);
-        if (isSafeCell(targetCell)) playStarSound();
+        drawBoard();
 
+        if (isSafeCell(targetCell)) playStarSound();
         finishMove(hasKilled);
       } else if (startStep >= 0 && startStep + dice <= 56) {
         let currentStepCount = 0;
@@ -988,6 +975,7 @@
             
             let targetCell = getPawnCell(turn, pawns[turn][pawnIndex]);
             let hasKilled = checkAndKillPawn(targetCell, turn);
+            drawBoard();
 
             if (isSafeCell(targetCell) || pawns[turn][pawnIndex] >= 51) {
               playStarSound();
