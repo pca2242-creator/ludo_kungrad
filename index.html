@@ -8,7 +8,6 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     
-    /* Fon rasmi shu yerda o'rnatiladi */
     body { 
       font-family: Arial, sans-serif; 
       background: #1c2733 url('rasm.jpg') no-repeat center center fixed; 
@@ -83,7 +82,6 @@
       grid-row: 2;
     }
 
-    /* O'yin maydoni va shaffofligi */
     canvas { 
       background: rgba(255, 255, 255, 0.95); 
       border-radius: 8px; 
@@ -110,7 +108,6 @@
     </div>
 
     <div id="board-container">
-      <!-- O'yin maydoni kattalashtirildi (360px) -->
       <canvas id="ludoCanvas" width="360" height="360"></canvas>
     </div>
 
@@ -131,9 +128,10 @@
 
     const canvas = document.getElementById('ludoCanvas');
     const ctx = canvas.getContext('2d');
-    const SIZE = 360; // Maydon kattaligi 360px qilindi
+    const SIZE = 360;
     const CELL = SIZE / 15;
 
+    // 0: Red, 1: Green, 2: Yellow, 3: Blue
     const COLORS = ['#ff4d4d', '#2ecc71', '#f1c40f', '#3498db'];
     const NAMES = ["Qizil", "Yashil", "Sariq", "Ko'k"];
 
@@ -170,11 +168,12 @@
       {r:8, c:13}, {r:12,c:8}, {r:13,c:6}, {r:8, c:2}   
     ];
 
+    // Baza koordinatalari [0:Red, 1:Green, 2:Yellow, 3:Blue]
     const baseCoords = [
-      [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],
-      [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],
-      [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],
-      [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]
+      [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],       // Red (Yuqori chap)
+      [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],   // Green (Yuqori o'ng)
+      [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],// Yellow (Pastki o'ng)
+      [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]     // Blue (Pastki chap)
     ];
 
     function getPawnCell(player, step) {
@@ -219,10 +218,11 @@
     function drawBoard() {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
-      drawSquare(0, 0, 6, COLORS[0]);
-      drawSquare(9, 0, 6, COLORS[1]);
-      drawSquare(0, 9, 6, COLORS[3]);
-      drawSquare(9, 9, 6, COLORS[2]);
+      // Zonalar ranglari to'g'rilandi:
+      drawSquare(0, 0, 6, COLORS[0]);   // Qizil (Yuqori Chap)
+      drawSquare(9, 0, 6, COLORS[1]);   // Yashil (Yuqori O'ng)
+      drawSquare(0, 9, 6, COLORS[3]);   // Ko'k (Pastki Chap)
+      drawSquare(9, 9, 6, COLORS[2]);   // Sariq (Pastki O'ng)
 
       drawSquare(1, 1, 4, '#fff');
       drawSquare(10, 1, 4, '#fff');
@@ -238,13 +238,15 @@
         }
       }
 
+      // Uyga kirish yo'laklari ranglari
       for(let i=1; i<=5; i++) {
-        fillCell(7, i, COLORS[0]);
-        fillCell(i, 7, COLORS[1]);
-        fillCell(7, 14-i, COLORS[2]);
-        fillCell(14-i, 7, COLORS[3]);
+        fillCell(7, i, COLORS[0]);     // Qizil yo'lak
+        fillCell(i, 7, COLORS[1]);     // Yashil yo'lak
+        fillCell(7, 14-i, COLORS[2]);  // Sariq yo'lak
+        fillCell(14-i, 7, COLORS[3]);  // Ko'k yo'lak
       }
 
+      // Boshlang'ich chiqish kataklari
       fillCell(6, 1, COLORS[0]);
       fillCell(1, 8, COLORS[1]);
       fillCell(8, 13, COLORS[2]);
