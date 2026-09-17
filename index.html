@@ -163,18 +163,31 @@
     }
 
     .p-name { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+    
     .dice-btn {
       border: none;
       color: #fff;
       padding: 8px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
       width: 90%;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: inline-block;
+      transition: transform 0.1s;
     }
     .dice-btn:disabled { background: #475569 !important; opacity: 0.4; cursor: not-allowed; }
+
+    /* Ludo King Zar Aylanma Animatsiyasi */
+    .dice-rolling {
+      animation: roll3d 0.15s infinite linear;
+    }
+    @keyframes roll3d {
+      0% { transform: rotate(0deg) scale(0.9); }
+      50% { transform: rotate(180deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(0.9); }
+    }
 
     #box-red { grid-column: 1; grid-row: 1; }
     #box-green { grid-column: 3; grid-row: 1; }
@@ -289,6 +302,7 @@
     let audioCtx = null;
     let bgMusicInterval = null;
     let musicOn = true;
+    let isAnimatingMove = false; // Tosh qimirlayotgan bo'lsa tugmalarni bloklash
 
     function initAudio() {
       if (!audioCtx) {
@@ -326,7 +340,7 @@
         osc.type = 'sine';
         osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
 
-        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
 
         osc.connect(gain);
@@ -370,34 +384,34 @@
       });
     }
 
-    // 🎲 HAQIQIY LUDO ZAR OVOZI (Realistic Dice Roll Shake & Clatter)
+    // 🎲 LUDO KING ZAR DUMALASH OVOZI
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
 
-      const bounces = 6;
-      for (let i = 0; i < bounces; i++) {
-        setTimeout(() => {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
+      let now = audioCtx.currentTime;
+      
+      // Shiqirlash zarbalari
+      for (let i = 0; i < 8; i++) {
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
 
-          osc.type = (i % 2 === 0) ? 'triangle' : 'square';
-          osc.frequency.setValueAtTime(280 + Math.random() * 150, audioCtx.currentTime);
+        osc.type = i % 2 === 0 ? 'square' : 'triangle';
+        osc.frequency.setValueAtTime(400 + Math.random() * 300, now + i * 0.03);
 
-          gain.gain.setValueAtTime(0.35 - (i * 0.04), audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.2, now + i * 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.03 + 0.02);
 
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.04);
-        }, i * 35);
+        osc.start(now + i * 0.03);
+        osc.stop(now + i * 0.03 + 0.02);
       }
     }
 
-    // ♟️ HAQIQIY LUDO TOSH YURISH OVOZI (Pawn Wood Step "Taq")
-    function playMoveSound() {
+    // ♟️ LUDO KING REALISTIK TOSH "TAQ" SAKRASH OVOZI
+    function playStepSound() {
       initAudio();
       if (!audioCtx) return;
 
@@ -405,25 +419,25 @@
       let gain = audioCtx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.06);
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.04);
 
-      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+      gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
 
       osc.connect(gain);
       gain.connect(audioCtx.destination);
 
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.06);
+      osc.stop(audioCtx.currentTime + 0.04);
     }
 
-    // ⭐ YULDUZGA KIRGANDAGI MAGIK OVOZ (Star / Safe Tile Sound)
+    // ⭐ YULDUZGA TUSHGAN OVOZI
     function playStarSound() {
       initAudio();
       if (!audioCtx) return;
 
-      const starNotes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      const starNotes = [523.25, 659.25, 783.99, 1046.50];
       starNotes.forEach((freq, idx) => {
         setTimeout(() => {
           let osc = audioCtx.createOscillator();
@@ -860,67 +874,103 @@
       });
     }
 
+    // 🎲 LUDO KING ZARIK ANIMATSIYASI VA DIOMIK ROLLING
     function handleRoll(pIndex) {
-      if (pIndex !== turn || rolled) return;
+      if (pIndex !== turn || rolled || isAnimatingMove) return;
 
       playDiceSound();
       const t = TRANSLATIONS[currentLang];
-      dice = Math.floor(Math.random() * 6) + 1;
+      const btn = document.getElementById(`btn-${turn}`);
+      
+      btn.classList.add('dice-rolling');
       rolled = true;
 
-      const btn = document.getElementById(`btn-${turn}`);
-      btn.innerText = `🎲 ${dice}`;
+      let rollCount = 0;
+      let rollInterval = setInterval(() => {
+        btn.innerText = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
+        rollCount++;
+        if (rollCount > 8) {
+          clearInterval(rollInterval);
+          btn.classList.remove('dice-rolling');
 
-      let homePawns = [];
-      let activePawnsList = [];
+          dice = Math.floor(Math.random() * 6) + 1;
+          btn.innerText = `🎲 ${dice}`;
 
-      for(let i=0; i<4; i++) {
-        let step = pawns[turn][i];
-        if (step === -1) homePawns.push(i);
-        else if (step >= 0 && step + dice <= 56) activePawnsList.push(i);
-      }
+          let homePawns = [];
+          let activePawnsList = [];
 
-      if (dice === 6 && homePawns.length > 0 && activePawnsList.length === 0) {
-        setTimeout(() => executeMove(homePawns[0]), 400);
-      }
-      else if (activePawnsList.length === 1 && dice !== 6) {
-        setTimeout(() => executeMove(activePawnsList[0]), 400);
-      }
-      else if (activePawnsList.length === 0 && (dice !== 6 || homePawns.length === 0)) {
-        document.getElementById('status-text').innerText = t.noMove.replace('{p}', t.names[turn]);
-        setTimeout(nextTurn, 1200);
-      } 
-      else {
-        document.getElementById('status-text').innerText = t.rolled.replace('{p}', t.names[turn]).replace('{d}', dice);
+          for(let i=0; i<4; i++) {
+            let step = pawns[turn][i];
+            if (step === -1) homePawns.push(i);
+            else if (step >= 0 && step + dice <= 56) activePawnsList.push(i);
+          }
+
+          if (dice === 6 && homePawns.length > 0 && activePawnsList.length === 0) {
+            setTimeout(() => executeMoveAnimated(homePawns[0]), 200);
+          }
+          else if (activePawnsList.length === 1 && dice !== 6) {
+            setTimeout(() => executeMoveAnimated(activePawnsList[0]), 200);
+          }
+          else if (activePawnsList.length === 0 && (dice !== 6 || homePawns.length === 0)) {
+            document.getElementById('status-text').innerText = t.noMove.replace('{p}', t.names[turn]);
+            setTimeout(nextTurn, 1000);
+          } 
+          else {
+            document.getElementById('status-text').innerText = t.rolled.replace('{p}', t.names[turn]).replace('{d}', dice);
+          }
+        }
+      }, 50);
+    }
+
+    // ♟️ LUDO KING STEP-BY-STEP TOSH YURISH ANIMATSIYASI
+    function executeMoveAnimated(pawnIndex) {
+      if (isAnimatingMove) return;
+      isAnimatingMove = true;
+
+      const t = TRANSLATIONS[currentLang];
+      let startStep = pawns[turn][pawnIndex];
+
+      if (startStep === -1 && dice === 6) {
+        // Uyidan birinchi qadamga chiqish
+        pawns[turn][pawnIndex] = 0;
+        playStepSound();
+        drawBoard();
+        
+        let targetCell = getPawnCell(turn, 0);
+        let hasKilled = checkAndKillPawn(targetCell, turn);
+        if (isSafeCell(targetCell)) playStarSound();
+
+        finishMove(hasKilled);
+      } else if (startStep >= 0 && startStep + dice <= 56) {
+        // Qadambaqadam sakrash animatsiyasi
+        let currentStepCount = 0;
+        let moveInterval = setInterval(() => {
+          pawns[turn][pawnIndex]++;
+          currentStepCount++;
+          playStepSound();
+          drawBoard();
+
+          if (currentStepCount >= dice) {
+            clearInterval(moveInterval);
+            
+            let targetCell = getPawnCell(turn, pawns[turn][pawnIndex]);
+            let hasKilled = checkAndKillPawn(targetCell, turn);
+
+            if (isSafeCell(targetCell) || pawns[turn][pawnIndex] >= 51) {
+              playStarSound();
+            }
+
+            finishMove(hasKilled);
+          }
+        }, 180); // Har bir katakka sakrash tezligi
+      } else {
+        isAnimatingMove = false;
       }
     }
 
-    function executeMove(pawnIndex) {
+    function finishMove(hasKilled) {
       const t = TRANSLATIONS[currentLang];
-      let step = pawns[turn][pawnIndex];
-      let hasKilled = false;
-
-      if (step === -1 && dice === 6) {
-        pawns[turn][pawnIndex] = 0;
-        let targetCell = getPawnCell(turn, 0);
-        hasKilled = checkAndKillPawn(targetCell, turn);
-        
-        if (isSafeCell(targetCell)) playStarSound();
-        else playMoveSound();
-
-      } else if (step >= 0 && step + dice <= 56) {
-        pawns[turn][pawnIndex] += dice;
-        let targetCell = getPawnCell(turn, pawns[turn][pawnIndex]);
-        hasKilled = checkAndKillPawn(targetCell, turn);
-
-        if (isSafeCell(targetCell) || pawns[turn][pawnIndex] >= 51) {
-          playStarSound();
-        } else {
-          playMoveSound();
-        }
-      }
-
-      drawBoard();
+      isAnimatingMove = false;
 
       if (hasKilled) {
         rolled = false;
@@ -931,12 +981,12 @@
         document.getElementById('status-text').innerText = t.sixExtra.replace('{p}', t.names[turn]);
         document.getElementById(`btn-${turn}`).innerText = t.diceBtn;
       } else {
-        setTimeout(nextTurn, 400);
+        setTimeout(nextTurn, 300);
       }
     }
 
     canvas.addEventListener('click', function(e) {
-      if (!rolled) return;
+      if (!rolled || isAnimatingMove) return;
 
       const rect = canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
@@ -962,7 +1012,7 @@
       if (clickedPawn !== -1) {
         let step = pawns[turn][clickedPawn];
         if ((step === -1 && dice === 6) || (step >= 0 && step + dice <= 56)) {
-          executeMove(clickedPawn);
+          executeMoveAnimated(clickedPawn);
         }
       }
     });
