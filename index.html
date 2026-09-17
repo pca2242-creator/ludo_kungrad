@@ -22,7 +22,6 @@
       justify-content: center;
     }
 
-    /* Musiqa o'chirish/yoqish tugmasi */
     .music-toggle {
       position: fixed;
       top: 12px;
@@ -39,7 +38,6 @@
       backdrop-filter: blur(8px);
     }
 
-    /* Start Animatsiyasi Overlaya */
     #start-animation-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -76,7 +74,6 @@
       to { transform: scale(1.2); opacity: 1; }
     }
 
-    /* Modal menyular */
     .overlay-menu {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -120,7 +117,6 @@
     .menu-btn:active { transform: scale(0.95); }
     .menu-btn.secondary { background: linear-gradient(135deg, #7f8c8d, #34495e); }
 
-    /* O'yin interfeysi */
     .game-container { display: none; width: 100%; max-width: 500px; padding-bottom: 50px; }
 
     .status-bar { 
@@ -220,13 +216,11 @@
 
   <button class="music-toggle" id="music-btn" onclick="toggleMusic()">🎵 Musiqa: ON</button>
 
-  <!-- Start Animatsiyasi -->
   <div id="start-animation-overlay">
     <div class="anim-title">GAME START!</div>
     <div class="anim-countdown" id="anim-count">3</div>
   </div>
 
-  <!-- 1. Til Tanlash Menyusi -->
   <div id="lang-menu" class="overlay-menu">
     <h1>Qoblannin' Ludo oyina xosh keldin'</h1>
     <p>Tilni tanlang / Тілді таңдаңыз / Тилди сайлаңъыз:</p>
@@ -235,7 +229,6 @@
     <button class="menu-btn" onclick="selectLanguage('kk')">🇰🇿 Qazaqsha</button>
   </div>
 
-  <!-- 2. Rejim Tanlash Menyusi -->
   <div id="mode-menu" class="overlay-menu" style="display: none;">
     <h1>Qoblannin' Ludo oyina xosh keldin'</h1>
     <p id="mode-title-text">O'yin rejimini tanlang:</p>
@@ -244,7 +237,6 @@
     <button class="menu-btn" id="btn-mode-4" onclick="startGameWithAnimation(4)">👥 4 Players</button>
   </div>
 
-  <!-- 3. In-Game Sozlamalar Menyusi -->
   <div id="settings-menu" class="overlay-menu" style="display: none;">
     <h1 id="settings-title">⚙️ SOZLAMALAR</h1>
     <button class="menu-btn" id="btn-restart" onclick="restartGame()">🔄 Qayta Boshlash</button>
@@ -253,7 +245,6 @@
     <button class="menu-btn secondary" id="btn-resume" onclick="closeSettings()">▶️ Davom Etish</button>
   </div>
 
-  <!-- 4. O'yin Maydoni -->
   <div class="game-container" id="game-ui">
     <div class="status-bar" id="status-text" style="color: #f1c40f;">
       Qoblannin' Ludo oyina xosh keldin'
@@ -294,7 +285,6 @@
     const tg = window.Telegram.WebApp;
     if (tg) tg.expand();
 
-    // Web Audio API Audio Engine
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     let bgMusicInterval = null;
@@ -321,7 +311,6 @@
       }
     }
 
-    // Dynamic Orqa fon Ludo melodiyasi
     function startBgMusic() {
       if (!musicOn || bgMusicInterval) return;
       initAudio();
@@ -356,7 +345,6 @@
       }
     }
 
-    // Intro Animatsiya va qo'shiq/ovoz effekti
     function playStartIntroSound() {
       initAudio();
       if (!audioCtx) return;
@@ -382,31 +370,33 @@
       });
     }
 
-    // Zar ovozi
+    // 🎲 HAQIQIY LUDO ZAR OVOZI (Realistic Dice Roll Shake & Clatter)
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
 
-      for (let i = 0; i < 5; i++) {
+      const bounces = 6;
+      for (let i = 0; i < bounces; i++) {
         setTimeout(() => {
           let osc = audioCtx.createOscillator();
           let gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(120 + Math.random() * 80, audioCtx.currentTime);
-          
-          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+
+          osc.type = (i % 2 === 0) ? 'triangle' : 'square';
+          osc.frequency.setValueAtTime(280 + Math.random() * 150, audioCtx.currentTime);
+
+          gain.gain.setValueAtTime(0.35 - (i * 0.04), audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
 
           osc.connect(gain);
           gain.connect(audioCtx.destination);
 
           osc.start();
-          osc.stop(audioCtx.currentTime + 0.05);
-        }, i * 40);
+          osc.stop(audioCtx.currentTime + 0.04);
+        }, i * 35);
       }
     }
 
-    // Tosh surish ovozi
+    // ♟️ HAQIQIY LUDO TOSH YURISH OVOZI (Pawn Wood Step "Taq")
     function playMoveSound() {
       initAudio();
       if (!audioCtx) return;
@@ -414,18 +404,44 @@
       let osc = audioCtx.createOscillator();
       let gain = audioCtx.createGain();
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(450, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.08);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.06);
 
-      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
 
       osc.connect(gain);
       gain.connect(audioCtx.destination);
 
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.08);
+      osc.stop(audioCtx.currentTime + 0.06);
+    }
+
+    // ⭐ YULDUZGA KIRGANDAGI MAGIK OVOZ (Star / Safe Tile Sound)
+    function playStarSound() {
+      initAudio();
+      if (!audioCtx) return;
+
+      const starNotes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      starNotes.forEach((freq, idx) => {
+        setTimeout(() => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+          gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.15);
+        }, idx * 70);
+      });
     }
 
     const TRANSLATIONS = {
@@ -880,7 +896,6 @@
     }
 
     function executeMove(pawnIndex) {
-      playMoveSound();
       const t = TRANSLATIONS[currentLang];
       let step = pawns[turn][pawnIndex];
       let hasKilled = false;
@@ -889,10 +904,20 @@
         pawns[turn][pawnIndex] = 0;
         let targetCell = getPawnCell(turn, 0);
         hasKilled = checkAndKillPawn(targetCell, turn);
+        
+        if (isSafeCell(targetCell)) playStarSound();
+        else playMoveSound();
+
       } else if (step >= 0 && step + dice <= 56) {
         pawns[turn][pawnIndex] += dice;
         let targetCell = getPawnCell(turn, pawns[turn][pawnIndex]);
         hasKilled = checkAndKillPawn(targetCell, turn);
+
+        if (isSafeCell(targetCell) || pawns[turn][pawnIndex] >= 51) {
+          playStarSound();
+        } else {
+          playMoveSound();
+        }
       }
 
       drawBoard();
