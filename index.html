@@ -9,8 +9,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     
     body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0f172a url('https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed; 
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #090d16 url('https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?q=80&w=1000&auto=format&fit=crop') no-repeat center center fixed; 
       background-size: cover; 
       color: #fff; 
       text-align: center; 
@@ -28,21 +28,22 @@
       top: 12px;
       right: 12px;
       z-index: 200;
-      background: rgba(30, 41, 59, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #f1c40f;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 13px;
       font-weight: bold;
       cursor: pointer;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
     #start-animation-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(9, 13, 22, 0.95);
       z-index: 300;
       display: none;
       flex-direction: column;
@@ -51,17 +52,19 @@
     }
 
     .anim-title {
-      font-size: 32px;
+      font-size: 34px;
+      font-weight: 800;
       color: #f1c40f;
-      text-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
+      text-shadow: 0 0 25px rgba(241, 196, 15, 0.9);
       animation: pulse 0.8s infinite alternate;
     }
 
     .anim-countdown {
-      font-size: 80px;
+      font-size: 85px;
       font-weight: bold;
       color: #3498db;
       margin-top: 10px;
+      text-shadow: 0 0 20px rgba(52, 152, 219, 0.8);
       animation: zoom 0.5s infinite alternate;
     }
 
@@ -78,8 +81,8 @@
     .overlay-menu {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.94);
-      backdrop-filter: blur(8px);
+      background: rgba(9, 13, 22, 0.94);
+      backdrop-filter: blur(10px);
       z-index: 100;
       display: flex;
       flex-direction: column;
@@ -92,7 +95,7 @@
       font-size: 24px;
       margin-bottom: 5px;
       color: #f1c40f;
-      text-shadow: 0 2px 10px rgba(241, 196, 15, 0.4);
+      text-shadow: 0 2px 10px rgba(241, 196, 15, 0.5);
       padding: 0 15px;
     }
 
@@ -112,7 +115,7 @@
       background: linear-gradient(135deg, #3498db, #2980b9);
       color: #fff;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
       transition: 0.2s transform;
     }
     .menu-btn:active { transform: scale(0.95); }
@@ -121,15 +124,15 @@
     .game-container { display: none; width: 100%; max-width: 500px; padding-bottom: 50px; }
 
     .status-bar { 
-      background: rgba(30, 41, 59, 0.85); 
+      background: rgba(15, 23, 42, 0.85); 
       border-radius: 12px; 
       padding: 10px; 
       margin-bottom: 12px; 
       font-weight: bold; 
       font-size: 15px; 
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
 
     .ludo-wrapper {
@@ -144,7 +147,7 @@
     .p-box {
       width: 100%;
       height: 100%;
-      background: rgba(30, 41, 59, 0.85);
+      background: rgba(15, 23, 42, 0.85);
       border-radius: 12px;
       display: flex;
       flex-direction: column;
@@ -154,13 +157,13 @@
       transition: 0.3s;
       border: 2px solid transparent;
       padding: 5px;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
     }
     .p-box.active {
       opacity: 1;
-      border-color: #fff;
+      border-color: #ffffff;
       transform: scale(1.03);
-      box-shadow: 0 0 15px rgba(255,255,255,0.3);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
     }
 
     .p-name { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
@@ -174,31 +177,22 @@
       border-radius: 10px;
       cursor: pointer;
       width: 90%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
       display: inline-block;
       transform-style: preserve-3d;
       transition: transform 0.15s ease-out;
     }
     .dice-btn:disabled { background: #475569 !important; opacity: 0.4; cursor: not-allowed; }
 
-    /* 🎲 Realistik Ludo King 3D Zar Aylanma Animatsiyasi */
     .dice-3d-roll {
-      animation: roll3dEffect 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      animation: roll3dEffect 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     @keyframes roll3dEffect {
-      0% {
-        transform: scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
-      }
-      30% {
-        transform: scale(1.35) rotateX(360deg) rotateY(180deg) rotateZ(90deg);
-      }
-      70% {
-        transform: scale(1.2) rotateX(720deg) rotateY(540deg) rotateZ(270deg);
-      }
-      100% {
-        transform: scale(1) rotateX(1080deg) rotateY(720deg) rotateZ(360deg);
-      }
+      0% { transform: scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+      30% { transform: scale(1.35) rotateX(360deg) rotateY(180deg) rotateZ(90deg); }
+      70% { transform: scale(1.2) rotateX(720deg) rotateY(540deg) rotateZ(270deg); }
+      100% { transform: scale(1) rotateX(1080deg) rotateY(720deg) rotateZ(360deg); }
     }
 
     #box-red { grid-column: 1; grid-row: 1; }
@@ -209,9 +203,9 @@
     #board-container { grid-column: 1 / span 3; grid-row: 2; }
 
     canvas { 
-      background: rgba(255, 255, 255, 0.95); 
-      border-radius: 12px; 
-      box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
+      background: #ffffff; 
+      border-radius: 16px; 
+      box-shadow: 0 12px 35px rgba(0,0,0,0.7), 0 0 15px rgba(255, 255, 255, 0.2); 
       touch-action: manipulation; 
     }
 
@@ -224,16 +218,16 @@
     }
 
     .bottom-menu-btn {
-      background: rgba(30, 41, 59, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #f1c40f;
-      padding: 8px 20px;
+      padding: 8px 22px;
       font-size: 14px;
       font-weight: bold;
       border-radius: 20px;
       cursor: pointer;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
   </style>
 </head>
@@ -251,7 +245,7 @@
     <p>Tilni tanlang / Тілді таңдаңыз / Тилди сайлаңъыз:</p>
     <button class="menu-btn" onclick="selectLanguage('uz')">🇺🇿 O'zbekcha</button>
     <button class="menu-btn" onclick="selectLanguage('qq')">🇦🇱 Qaraqalpaqsha</button>
-    <button class="menu-btn" onclick="selectLanguage('kk')">🇰🇿 Qazaqsha</button>
+    <button class="menu-btn" onclick="selectLanguage('kk')">🇰ℤ Qazaqsha</button>
   </div>
 
   <div id="mode-menu" class="overlay-menu" style="display: none;">
@@ -277,13 +271,13 @@
 
     <div class="ludo-wrapper">
       <div class="p-box" id="box-red">
-        <div class="p-name" id="name-0" style="color: #ff4d4d;">Qizil</div>
-        <button class="dice-btn" id="btn-0" style="background: #ff4d4d;" onclick="handleRoll(0)">🎲 Zar</button>
+        <div class="p-name" id="name-0" style="color: #ff3333;">Qizil</div>
+        <button class="dice-btn" id="btn-0" style="background: linear-gradient(135deg, #ff4d4d, #c0392b);" onclick="handleRoll(0)">🎲 Zar</button>
       </div>
 
       <div class="p-box" id="box-green">
         <div class="p-name" id="name-1" style="color: #2ecc71;">Yashil</div>
-        <button class="dice-btn" id="btn-1" style="background: #2ecc71;" onclick="handleRoll(1)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-1" style="background: linear-gradient(135deg, #2ecc71, #27ae60);" onclick="handleRoll(1)">🎲 Zar</button>
       </div>
 
       <div id="board-container">
@@ -292,12 +286,12 @@
 
       <div class="p-box" id="box-blue">
         <div class="p-name" id="name-3" style="color: #3498db;">Ko'k</div>
-        <button class="dice-btn" id="btn-3" style="background: #3498db;" onclick="handleRoll(3)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-3" style="background: linear-gradient(135deg, #3498db, #2980b9);" onclick="handleRoll(3)">🎲 Zar</button>
       </div>
 
       <div class="p-box" id="box-yellow">
         <div class="p-name" id="name-2" style="color: #f1c40f;">Sariq</div>
-        <button class="dice-btn" id="btn-2" style="background: #f1c40f; color:#000;" onclick="handleRoll(2)">🎲 Zar</button>
+        <button class="dice-btn" id="btn-2" style="background: linear-gradient(135deg, #f1c40f, #f39c12); color:#000;" onclick="handleRoll(2)">🎲 Zar</button>
       </div>
     </div>
 
@@ -396,53 +390,48 @@
       });
     }
 
-    // 🎲 YANADA REALISTIK LUDO KING ZAR DUMALASH VA STOLGA TUSHISH OVOZI
     function playDiceSound() {
       initAudio();
       if (!audioCtx) return;
 
       let now = audioCtx.currentTime;
-      
-      // Zar dumalashidagi tezkor ishqalanish tovushlari
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 8; i++) {
         let osc = audioCtx.createOscillator();
         let gain = audioCtx.createGain();
 
         osc.type = i % 2 === 0 ? 'square' : 'sawtooth';
-        osc.frequency.setValueAtTime(300 + Math.random() * 400, now + i * 0.04);
+        osc.frequency.setValueAtTime(320 + Math.random() * 380, now + i * 0.03);
 
-        gain.gain.setValueAtTime(0.15, now + i * 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.03);
+        gain.gain.setValueAtTime(0.15, now + i * 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.03 + 0.025);
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
 
-        osc.start(now + i * 0.04);
-        osc.stop(now + i * 0.04 + 0.03);
+        osc.start(now + i * 0.03);
+        osc.stop(now + i * 0.03 + 0.025);
       }
 
-      // Oxirida zarning stolga kelib tushishi (Impact noise)
       setTimeout(() => {
         if (!audioCtx) return;
         let impactOsc = audioCtx.createOscillator();
         let impactGain = audioCtx.createGain();
 
         impactOsc.type = 'triangle';
-        impactOsc.frequency.setValueAtTime(180, audioCtx.currentTime);
-        impactOsc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.08);
+        impactOsc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        impactOsc.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime + 0.06);
 
-        impactGain.gain.setValueAtTime(0.7, audioCtx.currentTime);
-        impactGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+        impactGain.gain.setValueAtTime(0.65, audioCtx.currentTime);
+        impactGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
 
         impactOsc.connect(impactGain);
         impactGain.connect(audioCtx.destination);
 
         impactOsc.start();
-        impactOsc.stop(audioCtx.currentTime + 0.08);
-      }, 480);
+        impactOsc.stop(audioCtx.currentTime + 0.06);
+      }, 350);
     }
 
-    // ♟️ LUDO KING REALISTIK TOSH SAKRASH OVOZI
     function playStepSound() {
       initAudio();
       if (!audioCtx) return;
@@ -451,20 +440,19 @@
       let gain = audioCtx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(850, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.04);
+      osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.035);
 
-      gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.55, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
 
       osc.connect(gain);
       gain.connect(audioCtx.destination);
 
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.04);
+      osc.stop(audioCtx.currentTime + 0.035);
     }
 
-    // ⭐ YULDUZGA TUSHGAN OVOZI
     function playStarSound() {
       initAudio();
       if (!audioCtx) return;
@@ -479,14 +467,14 @@
           osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
           gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
 
           osc.connect(gain);
           gain.connect(audioCtx.destination);
 
           osc.start();
-          osc.stop(audioCtx.currentTime + 0.15);
-        }, idx * 70);
+          osc.stop(audioCtx.currentTime + 0.12);
+        }, idx * 60);
       });
     }
 
@@ -605,7 +593,7 @@
           animOverlay.style.display = 'none';
           startGame(mode);
         }
-      }, 600);
+      }, 500);
     }
 
     function openSettings() {
@@ -638,10 +626,11 @@
     const SIZE = 360;
     const CELL = SIZE / 15;
 
-    const RED = '#e74c3c';
-    const GREEN = '#2ecc71';
-    const YELLOW = '#f1c40f';
-    const BLUE = '#3498db';
+    // YANADA TINIQ HD COLOR PALETTE
+    const RED = '#ff2a2a';
+    const GREEN = '#10b981';
+    const YELLOW = '#fbbf24';
+    const BLUE = '#3b82f6';
 
     const COLORS = [RED, GREEN, YELLOW, BLUE];
 
@@ -725,7 +714,7 @@
 
       setTimeout(() => {
         activateTurn();
-      }, 500);
+      }, 400);
 
       drawBoard();
     }
@@ -783,40 +772,50 @@
       return killed;
     }
 
+    // 🎨 YANADA TINIQ VA KUCHLI HD O'YIN TAQTASI RENDERI
     function drawBoard() {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
+      // Fon
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, SIZE, SIZE);
+
+      // Asosiy burchak zonalari
       drawSquare(0, 0, 6, RED);
       drawSquare(0, 9, 6, GREEN);
       drawSquare(9, 0, 6, BLUE);
       drawSquare(9, 9, 6, YELLOW);
 
+      // Ichki oq uychalar
       drawSquare(1, 1, 4, '#ffffff');
       drawSquare(1, 10, 4, '#ffffff');
       drawSquare(10, 1, 4, '#ffffff');
       drawSquare(10, 10, 4, '#ffffff');
 
+      // Baza joylari (Toshlar turadigan doiralar)
       baseCoords.forEach((playerBases, pIdx) => {
         playerBases.forEach(b => {
           ctx.beginPath();
-          ctx.arc(b.c * CELL + CELL/2, b.r * CELL + CELL/2, CELL/2.2, 0, Math.PI * 2);
-          ctx.fillStyle = '#e2e8f0';
+          ctx.arc(b.c * CELL + CELL/2, b.r * CELL + CELL/2, CELL/2.1, 0, Math.PI * 2);
+          ctx.fillStyle = '#f8fafc';
           ctx.fill();
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 3;
           ctx.strokeStyle = COLORS[pIdx];
           ctx.stroke();
         });
       });
 
+      // Kataklar va chegaralar (Grid lines)
       for(let r=0; r<15; r++) {
         for(let c=0; c<15; c++) {
           if ((r<6 && c<6) || (r<6 && c>8) || (r>8 && c<6) || (r>8 && c>8)) continue;
-          ctx.strokeStyle = '#cbd5e1';
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1.5;
           ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
         }
       }
 
+      // Rangli marralar
       for(let i=1; i<=5; i++) {
         fillCell(7, i, RED);
         fillCell(i, 7, GREEN);
@@ -824,6 +823,7 @@
         fillCell(7, 14-i, YELLOW);
       }
 
+      // Boshlang'ich rangli kataklar
       fillCell(6, 1, RED);
       fillCell(1, 8, GREEN);
       fillCell(13, 6, BLUE);
@@ -837,24 +837,31 @@
     function drawSquare(r, c, sz, color) {
       ctx.fillStyle = color;
       ctx.fillRect(c*CELL, r*CELL, sz*CELL, sz*CELL);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(0,0,0,0.15)";
+      ctx.strokeRect(c*CELL, r*CELL, sz*CELL, sz*CELL);
     }
 
     function fillCell(r, c, color) {
       ctx.fillStyle = color;
       ctx.fillRect(c*CELL, r*CELL, CELL, CELL);
       ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.5;
       ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
     }
 
     function drawStars() {
-      ctx.font = `${CELL * 0.75}px Arial`;
+      ctx.font = `bold ${CELL * 0.75}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
       safeStars.forEach(s => {
         let isColored = (s.r===6&&s.c===1) || (s.r===1&&s.c===8) || (s.r===8&&s.c===13) || (s.r===13&&s.c===6);
-        ctx.fillStyle = isColored ? '#ffffff' : '#f39c12';
+        ctx.fillStyle = isColored ? '#ffffff' : '#f59e0b';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 4;
         ctx.fillText('★', s.c * CELL + CELL / 2, s.r * CELL + CELL / 2 + 1);
+        ctx.shadowColor = 'transparent';
       });
     }
 
@@ -865,8 +872,13 @@
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y1); ctx.fillStyle = GREEN; ctx.fill();
       ctx.beginPath(); ctx.moveTo(x1, y2); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = BLUE; ctx.fill();
       ctx.beginPath(); ctx.moveTo(x2, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = YELLOW; ctx.fill();
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.strokeRect(x1, y1, 3*CELL, 3*CELL);
     }
 
+    // ♟️ TINIQ HD TOSHLAR RENDERI
     function drawPawns() {
       activePlayers.forEach(p => {
         for(let i=0; i<4; i++) {
@@ -876,37 +888,36 @@
 
           let cx = cell.c * CELL + CELL/2;
           let cy = cell.r * CELL + CELL/2;
-          let radius = CELL / 2.5;
+          let radius = CELL / 2.4;
 
           ctx.beginPath();
           ctx.arc(cx, cy, radius, 0, Math.PI * 2);
           ctx.fillStyle = COLORS[p];
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-          ctx.shadowBlur = 6;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 8;
+          ctx.shadowOffsetX = 3;
+          ctx.shadowOffsetY = 3;
           ctx.fill();
 
           ctx.shadowColor = 'transparent';
 
-          ctx.lineWidth = 2.5;
+          ctx.lineWidth = 3;
           ctx.strokeStyle = '#ffffff';
           ctx.stroke();
 
           let grad = ctx.createRadialGradient(cx - radius/3, cy - radius/3, 1, cx, cy, radius);
           grad.addColorStop(0, '#ffffff');
-          grad.addColorStop(0.5, COLORS[p]);
+          grad.addColorStop(0.4, COLORS[p]);
           grad.addColorStop(1, '#000000');
 
           ctx.beginPath();
-          ctx.arc(cx, cy, radius * 0.75, 0, Math.PI * 2);
+          ctx.arc(cx, cy, radius * 0.7, 0, Math.PI * 2);
           ctx.fillStyle = grad;
           ctx.fill();
         }
       });
     }
 
-    // 🎲 REALISTIK 3D DUMALASH ANIMATSIYASI VA AUDIO INTEGRATSIYA
     function handleRoll(pIndex) {
       if (pIndex !== turn || rolled || isAnimatingMove) return;
 
@@ -915,15 +926,13 @@
       const btn = document.getElementById(`btn-${turn}`);
       
       rolled = true;
-
-      // 3D CSS aylanish klassini qo'shish
       btn.classList.add('dice-3d-roll');
 
       let rollCount = 0;
       let rollInterval = setInterval(() => {
         btn.innerText = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
         rollCount++;
-        if (rollCount > 10) {
+        if (rollCount > 8) {
           clearInterval(rollInterval);
           btn.classList.remove('dice-3d-roll');
 
@@ -940,23 +949,23 @@
           }
 
           if (dice === 6 && homePawns.length > 0 && activePawnsList.length === 0) {
-            setTimeout(() => executeMoveAnimated(homePawns[0]), 200);
+            setTimeout(() => executeMoveAnimated(homePawns[0]), 150);
           }
           else if (activePawnsList.length === 1 && dice !== 6) {
-            setTimeout(() => executeMoveAnimated(activePawnsList[0]), 200);
+            setTimeout(() => executeMoveAnimated(activePawnsList[0]), 150);
           }
           else if (activePawnsList.length === 0 && (dice !== 6 || homePawns.length === 0)) {
             document.getElementById('status-text').innerText = t.noMove.replace('{p}', t.names[turn]);
-            setTimeout(nextTurn, 1000);
+            setTimeout(nextTurn, 800);
           } 
           else {
             document.getElementById('status-text').innerText = t.rolled.replace('{p}', t.names[turn]).replace('{d}', dice);
           }
         }
-      }, 55);
+      }, 45);
     }
 
-    // ♟️ STEP-BY-STEP TOSH YURISH ANIMATSIYASI
+    // ⚡ TEZKOR VA SILLIQ TOSH SAKRASH ANIMATSIYASI (80ms)
     function executeMoveAnimated(pawnIndex) {
       if (isAnimatingMove) return;
       isAnimatingMove = true;
@@ -994,7 +1003,7 @@
 
             finishMove(hasKilled);
           }
-        }, 180);
+        }, 80); // Tezlashtirilgan sakrash vaqti
       } else {
         isAnimatingMove = false;
       }
@@ -1013,7 +1022,7 @@
         document.getElementById('status-text').innerText = t.sixExtra.replace('{p}', t.names[turn]);
         document.getElementById(`btn-${turn}`).innerText = t.diceBtn;
       } else {
-        setTimeout(nextTurn, 300);
+        setTimeout(nextTurn, 250);
       }
     }
 
