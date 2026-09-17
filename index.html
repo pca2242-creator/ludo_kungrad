@@ -3,36 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Ludo Offline 4 Player</title>
+  <title>Ludo 4 Player Offline</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body { font-family: sans-serif; background: #1c2733; color: #fff; text-align: center; padding: 10px; }
+    body { font-family: Arial, sans-serif; background: #1c2733; color: #fff; text-align: center; padding: 10px; }
     
     .status-bar { background: #243142; border-radius: 10px; padding: 12px; margin-bottom: 10px; font-weight: bold; font-size: 16px; }
     
     #game-container { display: flex; justify-content: center; align-items: center; margin: 10px 0; }
-    canvas { background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); touch-action: manipulation; }
+    canvas { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); touch-action: manipulation; }
 
-    .controls { background: #243142; border-radius: 10px; padding: 15px; display: flex; justify-content: space-around; align-items: center; }
-    #dice-btn { background: #2aabee; color: #fff; border: none; padding: 12px 24px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-    #dice-btn:disabled { background: #555; opacity: 0.6; }
-    #dice-val { font-size: 32px; font-weight: bold; min-width: 60px; }
+    /* 4 o'yinchi uchun zar panellari */
+    .players-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .player-card { background: #243142; border: 2px solid transparent; border-radius: 10px; padding: 10px; opacity: 0.5; transition: 0.3s; }
+    .player-card.active { opacity: 1; border-color: #fff; transform: scale(1.02); }
+    
+    .dice-btn { color: #fff; border: none; padding: 8px 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 5px; }
+    .dice-btn:disabled { background: #555 !important; opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body>
 
   <div class="status-bar" id="status-text" style="color: #ff4d4d;">
-    Navbat: Qizil (1-O'yinchi)
+    Navbat: Qizil (1-O'yinchi) - Zarni tashlang!
   </div>
 
   <div id="game-container">
     <canvas id="ludoCanvas" width="360" height="360"></canvas>
   </div>
 
-  <div class="controls">
-    <div id="dice-val">🎲 1</div>
-    <button id="dice-btn" onclick="handleRoll()">Zar tashlash</button>
+  <!-- Har bir o'yinchi uchun alohida zar paneli -->
+  <div class="players-panel">
+    <div class="player-card active" id="card-0" style="background: #3b1818;">
+      <div style="color: #ff4d4d; font-weight:bold;">1. Qizil</div>
+      <button class="dice-btn" id="btn-0" style="background: #ff4d4d;" onclick="handleRoll(0)">🎲 Zar</button>
+    </div>
+    <div class="player-card" id="card-1" style="background: #183b22;">
+      <div style="color: #2ecc71; font-weight:bold;">2. Yashil</div>
+      <button class="dice-btn" id="btn-1" style="background: #2ecc71;" onclick="handleRoll(1)" disabled>🎲 Zar</button>
+    </div>
+    <div class="player-card" id="card-3" style="background: #182c3b;">
+      <div style="color: #3498db; font-weight:bold;">4. Ko'k</div>
+      <button class="dice-btn" id="btn-3" style="background: #3498db;" onclick="handleRoll(3)" disabled>🎲 Zar</button>
+    </div>
+    <div class="player-card" id="card-2" style="background: #3b3718;">
+      <div style="color: #f1c40f; font-weight:bold;">3. Sariq</div>
+      <button class="dice-btn" id="btn-2" style="background: #f1c40f; color:#000;" onclick="handleRoll(2)" disabled>🎲 Zar</button>
+    </div>
   </div>
 
   <script>
@@ -44,139 +62,248 @@
     const SIZE = 360;
     const CELL = SIZE / 15;
 
-    // Ranglar va Playerlar
-    const PLAYER_COLORS = ['#ff4d4d', '#2ecc71', '#f1c40f', '#3498db'];
-    const PLAYER_NAMES = ["Qizil", "Yashil", "Sariq", "Ko'k"];
+    const COLORS = ['#ff4d4d', '#2ecc71', '#f1c40f', '#3498db'];
+    const NAMES = ["Qizil", "Yashil", "Sariq", "Ko'k"];
 
     let turn = 0; // 0: Red, 1: Green, 2: Yellow, 3: Blue
-    let dice = 1;
+    let dice = 0;
     let rolled = false;
 
-    // 4 ta player uchun 4 tadan toshlarning pozitsiyalari (-1 = bazada, 0..56 = yo'lda, 99 = marrada)
+    // Har bir o'yinchining 4 ta toshi (0..56 step, -1 = Baza)
     let pawns = [
-      [-1, -1, -1, -1], // Red
-      [-1, -1, -1, -1], // Green
-      [-1, -1, -1, -1], // Yellow
-      [-1, -1, -1, -1]  // Blue
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1],
+      [-1, -1, -1, -1]
     ];
 
-    // Boshlang'ich koordinatalar
-    function draw() {
+    // Asosiy xaritadagi 52 ta universal katakcha yo'lagi
+    const mainPath = [
+      {r:6,c:1}, {r:6,c:2}, {r:6,c:3}, {r:6,c:4}, {r:6,c:5},
+      {r:5,c:6}, {r:4,c:6}, {r:3,c:6}, {r:2,c:6}, {r:1,c:6}, {r:0,c:6},
+      {r:0,c:7}, {r:0,c:8},
+      {r:1,c:8}, {r:2,c:8}, {r:3,c:8}, {r:4,c:8}, {r:5,c:8},
+      {r:6,c:9}, {r:6,c:10}, {r:6,c:11}, {r:6,c:12}, {r:6,c:13}, {r:6,c:14},
+      {r:7,c:14}, {r:8,c:14},
+      {r:8,c:13}, {r:8,c:12}, {r:8,c:11}, {r:8,c:10}, {r:8,c:9},
+      {r:9,c:8}, {r:10,c:8}, {r:11,c:8}, {r:12,c:8}, {r:13,c:8}, {r:14,c:8},
+      {r:14,c:7}, {r:14,c:6},
+      {r:13,c:6}, {r:12,c:6}, {r:11,c:6}, {r:10,c:6}, {r:9,c:6},
+      {r:8,c:5}, {r:8,c:4}, {r:8,c:3}, {r:8,c:2}, {r:8,c:1}, {r:8,c:0},
+      {r:7,c:0}, {r:6,c:0}
+    ];
+
+    // Har bir rangning boshlanish indeksi va uyga kirish (Marra) yo'li
+    const startOffset = [0, 13, 26, 39];
+
+    function getPawnCell(player, step) {
+      if (step === -1) return null; // Bazada
+      
+      // Marraga kirish yo'li (51-qadamdan keyin)
+      if (step >= 51) {
+        let homeIndex = step - 51;
+        if (player === 0) return { r: 7, c: 1 + homeIndex };
+        if (player === 1) return { r: 1 + homeIndex, c: 7 };
+        if (player === 2) return { r: 7, c: 13 - homeIndex };
+        if (player === 3) return { r: 13 - homeIndex, c: 7 };
+      }
+
+      // Umumiy yo'lak bo'ylab aylanish
+      let idx = (startOffset[player] + step) % 52;
+      return mainPath[idx];
+    }
+
+    function drawBoard() {
       ctx.clearRect(0, 0, SIZE, SIZE);
 
-      // 1. Taxta zonalari
-      drawRect(0, 0, 6*CELL, 6*CELL, PLAYER_COLORS[0]);
-      drawRect(9*CELL, 0, 6*CELL, 6*CELL, PLAYER_COLORS[1]);
-      drawRect(0, 9*CELL, 6*CELL, 6*CELL, PLAYER_COLORS[3]);
-      drawRect(9*CELL, 9*CELL, 6*CELL, 6*CELL, PLAYER_COLORS[2]);
+      // 1. Uychalarni (Baza) chizish
+      drawSquare(0, 0, 6, COLORS[0]);
+      drawSquare(9, 0, 6, COLORS[1]);
+      drawSquare(9, 9, 6, COLORS[2]);
+      drawSquare(0, 9, 6, COLORS[3]);
 
-      // Ichki oq kvadratlar
-      drawRect(CELL, CELL, 4*CELL, 4*CELL, '#fff');
-      drawRect(10*CELL, CELL, 4*CELL, 4*CELL, '#fff');
-      drawRect(CELL, 10*CELL, 4*CELL, 4*CELL, '#fff');
-      drawRect(10*CELL, 10*CELL, 4*CELL, 4*CELL, '#fff');
+      drawSquare(1, 1, 4, '#fff');
+      drawSquare(10, 1, 4, '#fff');
+      drawSquare(10, 10, 4, '#fff');
+      drawSquare(1, 10, 4, '#fff');
 
-      // Setka chizish
+      // 2. Setka va katakchalarni chizish
       for(let r=0; r<15; r++) {
         for(let c=0; c<15; c++) {
           if ((r<6 && c<6) || (r<6 && c>8) || (r>8 && c<6) || (r>8 && c>8)) continue;
-          ctx.strokeStyle = '#ddd';
+          ctx.strokeStyle = '#ccc';
+          ctx.lineWidth = 1;
           ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
         }
       }
 
-      // 2. Toshlarni chizish (Pawns)
+      // 3. Ortadagi Marraga olib boruvchi Rangli Shiziqlar (Home Paths)
+      for(let i=1; i<=5; i++) {
+        fillCell(7, i, COLORS[0]);  // Qizil marra chizig'i
+        fillCell(i, 7, COLORS[1]);  // Yashil marra chizig'i
+        fillCell(7, 14-i, COLORS[2]);// Sariq marra chizig'i
+        fillCell(14-i, 7, COLORS[3]);// Ko'k marra chizig'i
+      }
+
+      // Chiqish katakchalari (Boshlanish nuqtalari)
+      fillCell(6, 1, COLORS[0]);
+      fillCell(1, 8, COLORS[1]);
+      fillCell(8, 13, COLORS[2]);
+      fillCell(13, 6, COLORS[3]);
+
+      // 4. Markaziy Marrani Chizish (Uchburchaklar)
+      drawCenterHome();
+
+      // 5. Toshlarni (Pawns) chizish
+      drawPawns();
+    }
+
+    function drawSquare(r, c, sz, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(c*CELL, r*CELL, sz*CELL, sz*CELL);
+    }
+
+    function fillCell(r, c, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(c*CELL, r*CELL, CELL, CELL);
+      ctx.strokeStyle = '#ccc';
+      ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
+    }
+
+    function drawCenterHome() {
+      let x1 = 6*CELL, x2 = 9*CELL, y1 = 6*CELL, y2 = 9*CELL, xm = 7.5*CELL, ym = 7.5*CELL;
+
+      // Qizil
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x1, y2); ctx.fillStyle = COLORS[0]; ctx.fill();
+      // Yashil
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y1); ctx.fillStyle = COLORS[1]; ctx.fill();
+      // Sariq
+      ctx.beginPath(); ctx.moveTo(x2, y1); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = COLORS[2]; ctx.fill();
+      // Ko'k
+      ctx.beginPath(); ctx.moveTo(x1, y2); ctx.lineTo(xm, ym); ctx.lineTo(x2, y2); ctx.fillStyle = COLORS[3]; ctx.fill();
+    }
+
+    function drawPawns() {
+      // Bazadagi toshlar o'rni
+      const baseCoords = [
+        [{r:2,c:2}, {r:2,c:4}, {r:4,c:2}, {r:4,c:4}],
+        [{r:2,c:11}, {r:2,c:13}, {r:4,c:11}, {r:4,c:13}],
+        [{r:11,c:11}, {r:11,c:13}, {r:13,c:11}, {r:13,c:13}],
+        [{r:11,c:2}, {r:11,c:4}, {r:13,c:2}, {r:13,c:4}]
+      ];
+
       for(let p=0; p<4; p++) {
         for(let i=0; i<4; i++) {
-          let pos = pawns[p][i];
-          let coord = getCoordinates(p, i, pos);
-          drawPawn(coord.x, coord.y, PLAYER_COLORS[p]);
+          let step = pawns[p][i];
+          let cell = getPawnCell(p, step);
+
+          if (!cell) {
+            cell = baseCoords[p][i];
+          }
+
+          let cx = cell.c * CELL + CELL/2;
+          let cy = cell.r * CELL + CELL/2;
+
+          ctx.beginPath();
+          ctx.arc(cx, cy, CELL/2.6, 0, Math.PI*2);
+          ctx.fillStyle = COLORS[p];
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#ffffff';
+          ctx.stroke();
+
+          // Ichki doira (Tanlab olish oson bo'lishi uchun)
+          ctx.beginPath();
+          ctx.arc(cx, cy, CELL/6, 0, Math.PI*2);
+          ctx.fillStyle = '#fff';
+          ctx.fill();
         }
       }
     }
 
-    function drawRect(x, y, w, h, color) {
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, w, h);
-    }
+    // Zar tashlash funksiyasi
+    function handleRoll(pIndex) {
+      if (pIndex !== turn || rolled) return;
 
-    function drawPawn(x, y, color) {
-      ctx.beginPath();
-      ctx.arc(x, y, CELL/2.5, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#ffffff';
-      ctx.stroke();
-    }
-
-    // Toshlarning koordinatasini hisoblash
-    function getCoordinates(player, index, pos) {
-      if (pos === -1) {
-        // Bazadagi koordinata
-        const bases = [
-          [{x:2,y:2}, {x:4,y:2}, {x:2,y:4}, {x:4,y:4}],
-          [{x:11,y:2}, {x:13,y:2}, {x:11,y:4}, {x:13,y:4}],
-          [{x:11,y:11}, {x:13,y:11}, {x:11,y:13}, {x:13,y:13}],
-          [{x:2,y:11}, {x:4,y:11}, {x:2,y:13}, {x:4,y:13}]
-        ];
-        let b = bases[player][index];
-        return { x: b.x * CELL, y: b.y * CELL };
-      }
-      // Yo'ldagi harakat soddalashtirilgan namuna
-      return { x: (1 + index) * CELL, y: (1 + player * 3) * CELL };
-    }
-
-    // Zar tashlash
-    function handleRoll() {
-      if (rolled) return;
       dice = Math.floor(Math.random() * 6) + 1;
-      document.getElementById('dice-val').innerText = `🎲 ${dice}`;
       rolled = true;
 
-      // Agar zar 6 bo'lmasa va barcha toshlar bazada bo'lsa, navbat o'tadi
-      let hasActivePawn = pawns[turn].some(p => p !== -1);
-      if (dice !== 6 && !hasActivePawn) {
-        setTimeout(nextTurn, 1000);
+      const btn = document.getElementById(`btn-${turn}`);
+      btn.innerText = `🎲 ${dice}`;
+
+      let canMove = false;
+      for(let i=0; i<4; i++) {
+        if (pawns[turn][i] === -1 && dice === 6) canMove = true;
+        if (pawns[turn][i] >= 0 && pawns[turn][i] + dice <= 56) canMove = true;
+      }
+
+      if (!canMove) {
+        document.getElementById('status-text').innerText = `${NAMES[turn]}: Yurishga yurish yo'q! Navbat o'tdi.`;
+        setTimeout(nextTurn, 1200);
       } else {
-        document.getElementById('status-text').innerText = `${PLAYER_NAMES[turn]}: Toshni tanlang va bosing!`;
+        document.getElementById('status-text').innerText = `${NAMES[turn]}: Tashlangan zar (${dice}). Suriladigan toshni bosing!`;
       }
     }
 
-    // Toshni bosib surish (Canvas touch/click)
+    // Canvas ustiga bosganda toshni surish
     canvas.addEventListener('click', function(e) {
       if (!rolled) return;
 
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
 
-      // Toshni chiqarish yoki surish mantig'i
+      let c = Math.floor(clickX / CELL);
+      let r = Math.floor(clickY / CELL);
+
+      // Bosilgan katakdagi toshni topish
+      let moved = false;
       for(let i=0; i<4; i++) {
-        if (pawns[turn][i] === -1 && dice === 6) {
-          pawns[turn][i] = 0; // Bazadan chiqarish
+        let step = pawns[turn][i];
+        
+        // Bazadan chiqarish (6 chiqaganda)
+        if (step === -1 && dice === 6) {
+          pawns[turn][i] = 0;
+          moved = true;
           break;
-        } else if (pawns[turn][i] >= 0) {
-          pawns[turn][i] += dice; // Oldinga surish
+        } 
+        // Maydondagi toshni surish
+        else if (step >= 0 && step + dice <= 56) {
+          pawns[turn][i] += dice;
+          moved = true;
           break;
         }
       }
 
-      draw();
-      setTimeout(nextTurn, 500);
+      if (moved) {
+        drawBoard();
+        if (dice === 6) {
+          rolled = false;
+          document.getElementById('status-text').innerText = `${NAMES[turn]}: 6 tushdi! Yana bir marta zar tashlang.`;
+          document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
+        } else {
+          setTimeout(nextTurn, 500);
+        }
+      }
     });
 
     function nextTurn() {
-      if (dice !== 6) {
-        turn = (turn + 1) % 4;
-      }
+      document.getElementById(`card-${turn}`).classList.remove('active');
+      document.getElementById(`btn-${turn}`).disabled = true;
+      document.getElementById(`btn-${turn}`).innerText = `🎲 Zar`;
+
+      turn = (turn + 1) % 4;
       rolled = false;
+
+      document.getElementById(`card-${turn}`).classList.add('active');
+      document.getElementById(`btn-${turn}`).disabled = false;
+
       const status = document.getElementById('status-text');
-      status.innerText = `Navbat: ${PLAYER_NAMES[turn]} (${turn + 1}-O'yinchi)`;
-      status.style.color = PLAYER_COLORS[turn];
+      status.innerText = `Navbat: ${NAMES[turn]} (${turn + 1}-O'yinchi) - Zarni bosing!`;
+      status.style.color = COLORS[turn];
     }
 
-    draw();
+    drawBoard();
   </script>
 </body>
 </html>
